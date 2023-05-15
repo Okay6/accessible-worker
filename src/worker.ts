@@ -1,14 +1,15 @@
+import {WorkerModule} from "./worker_module";
+
 /**
  * 需要定义一个此Worker引用的全局ES Module，在Web Worker(.js)woker中引入第三方库
  */
-import { WorkerModules } from './worker_module'
+
 function first() {
     console.log("first(): factory evaluated");
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
       console.log("first(): called");
       console.log(target)
-      console.log(target.toString())
-      console.log(propertyKey)
+      console.log(target[propertyKey].toString())
     };
   }
    
@@ -27,11 +28,12 @@ export class AccessibleChannelWorker {
      */
     @first()
     run() {
-        WorkerModules.uuidv4()
         // this引用取消(this.)，直接转为全局引用
         this.workerVariable = 'changed_variable';
         //  
         this.postMessage()
+        console.log(WorkerModule.uuidv4())
+        console.log(WorkerModule.var)
     }
 
     postMessage() {

@@ -1,9 +1,9 @@
 import { v4 as uuidv4} from "uuid";
 
-export const WorkerModules = {
-    uuidv4
+export const WorkerModule ={
+    uuidv4:uuidv4,
+    var:'variable'
 }
-
 
 
 
