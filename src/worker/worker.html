@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html>
     <head>
-        
     </head>
     <body>
         <button id="generate-uuid">Generate UUID</button>
         <p id="uuid"></p>
         <script>
              const worker = new Worker('./worker.js',{type:'module'})
-              
              worker.onmessage = (e)=>{
-                if(uuidP){
+                if(uuidP) {
                         uuidP.innerText = e.data
                     }
              }
@@ -21,8 +19,6 @@
                     worker.postMessage('getUUID')
                 })
              }
-          
-
         </script>
     </body>
    

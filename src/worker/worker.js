@@ -1,5 +1,5 @@
-import WorkerModules from './modules/main.js'
+import {uuidv4} from './modules/main.js'
 
 self.onmessage = (e)=>{
-    self.postMessage(WorkerModules.uuidv4())
+    self.postMessage(uuidv4())
 }
