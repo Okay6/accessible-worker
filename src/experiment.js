@@ -55,5 +55,4 @@ var AccessibleWorkerFactory = /** @class */ (function () {
 }());
 exports.AccessibleWorkerFactory = AccessibleWorkerFactory;
 var a = AccessibleWorkerFactory.register(MyWorker);
-new MyWorker();
 a.send('Ok');
