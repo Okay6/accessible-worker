@@ -43,10 +43,14 @@ var worker_module_1 = require("./worker_module");
 function first() {
     console.log("first(): factory evaluated");
     return function (target, propertyKey, descriptor) {
+        var _a;
         console.log("first(): called");
         console.log(target);
-        console.log(target.toString());
-        console.log(propertyKey);
+        console.log("====".concat(target.toString(), "==="));
+        console.log(target[propertyKey]);
+        if (descriptor) {
+            console.log((_a = descriptor.get) === null || _a === void 0 ? void 0 : _a.call(descriptor));
+        }
     };
 }
 /**
@@ -67,11 +71,11 @@ var AccessibleChannelWorker = exports.AccessibleChannelWorker = function () {
              * 带有指定装饰器的类级别属性将会被编译为Web Worker(.js)全局方法
              */
             AccessibleChannelWorker.prototype.run = function () {
-                worker_module_1.WorkerModules.uuidv4();
                 // this引用取消(this.)，直接转为全局引用
                 this.workerVariable = 'changed_variable';
                 //  
                 this.postMessage();
+                console.log(worker_module_1.WorkerModules["var"]);
             };
             AccessibleChannelWorker.prototype.postMessage = function () {
                 // 等价于 self.postMessage()

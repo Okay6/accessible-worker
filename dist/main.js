@@ -8,6 +8,16 @@
  */
 /******/ var __webpack_modules__ = ({
 
+/***/ "./src/worker.ts":
+/*!***********************!*\
+  !*** ./src/worker.ts ***!
+  \***********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"AccessibleChannelWorker\": () => (/* binding */ AccessibleChannelWorker),\n/* harmony export */   \"AccessibleFunctionalWorker\": () => (/* binding */ AccessibleFunctionalWorker)\n/* harmony export */ });\n/* harmony import */ var _worker_module__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./worker_module */ \"./src/worker_module.ts\");\nvar __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {\n    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;\n    if (typeof Reflect === \"object\" && typeof Reflect.decorate === \"function\") r = Reflect.decorate(decorators, target, key, desc);\n    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;\n    return c > 3 && r && Object.defineProperty(target, key, r), r;\n};\n\n/**\n * 需要定义一个此Worker引用的全局ES Module，在Web Worker(.js)woker中引入第三方库\n */\nfunction first() {\n    console.log(\"first(): factory evaluated\");\n    return function (target, propertyKey, descriptor) {\n        console.log(\"first(): called\");\n        console.log(target);\n        console.log(target[propertyKey].toString());\n    };\n}\n/**\n * 带有指定装饰器的类并符合要求的Class将会被编译为Web Worker(.js)\n */\nclass AccessibleChannelWorker {\n    constructor() {\n        /**\n         * 带有指定装饰器的类级别属性将会被编译为Web Worker(.js)全局变量\n         */\n        this.workerVariable = 'variable';\n    }\n    /**\n     * 带有指定装饰器的类级别属性将会被编译为Web Worker(.js)全局方法\n     */\n    run() {\n        // this引用取消(this.)，直接转为全局引用\n        this.workerVariable = 'changed_variable';\n        //  \n        this.postMessage();\n        console.log(_worker_module__WEBPACK_IMPORTED_MODULE_0__.WorkerModule.uuidv4());\n        console.log(_worker_module__WEBPACK_IMPORTED_MODULE_0__.WorkerModule[\"var\"]);\n    }\n    postMessage() {\n        // 等价于 self.postMessage()\n    }\n    onMessage() {\n        // 等价于 self.onmessage\n    }\n}\n__decorate([\n    first()\n], AccessibleChannelWorker.prototype, \"run\", null);\nclass AccessibleFunctionalWorker {\n    uuid() {\n        return '';\n    }\n    caluate(a, b) {\n        return a + b;\n    }\n}\nconst s = new AccessibleChannelWorker();\ns.run();\n\n\n//# sourceURL=webpack://web_worker_research/./src/worker.ts?");
+
+/***/ }),
+
 /***/ "./src/worker_module.ts":
 /*!******************************!*\
   !*** ./src/worker_module.ts ***!
@@ -138,7 +148,8 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /******/ // startup
 /******/ // Load entry module and return exports
 /******/ // This entry module can't be inlined because the eval devtool is used.
-/******/ var __webpack_exports__ = __webpack_require__("./src/worker_module.ts");
-/******/ var __webpack_exports__WorkerModule = __webpack_exports__.WorkerModule;
-/******/ export { __webpack_exports__WorkerModule as WorkerModule };
+/******/ var __webpack_exports__ = __webpack_require__("./src/worker.ts");
+/******/ var __webpack_exports__AccessibleChannelWorker = __webpack_exports__.AccessibleChannelWorker;
+/******/ var __webpack_exports__AccessibleFunctionalWorker = __webpack_exports__.AccessibleFunctionalWorker;
+/******/ export { __webpack_exports__AccessibleChannelWorker as AccessibleChannelWorker, __webpack_exports__AccessibleFunctionalWorker as AccessibleFunctionalWorker };
 /******/ 
