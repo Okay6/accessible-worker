@@ -71,5 +71,5 @@ export class AccessibleFunctionalWorker {
     }
 }
 
-const s = new AccessibleChannelWorker()
-s.run()
+// const s = new AccessibleChannelWorker()
+// s.run()
