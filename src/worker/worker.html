@@ -8,6 +8,7 @@
         <p id="uuid"></p>
         <script>
              const worker = new Worker('./worker.js',{type:'module'})
+             worker.postMessage()
              worker.onmessage = (e)=>{
                 if(uuidP) {
                         uuidP.innerText = e.data

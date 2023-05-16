@@ -18,4 +18,46 @@
 - 需要将TypeScript 引用编译为 一个模块集合，给Web Worker中函数使用
 - 函数中不可以使用类型声明以及一些TypeScript语法
 
+## Worker Factory
+
+- register，注册worker
+- get， 获取一个包装的worker
+- Channel Worker
+- Function Worker
+
+## Objects
+
+- Interface
+- Abstract class
+- Decorator
+- Compiler
+
+## Description
+
+- Channel 双向通道， send， subscribe， post，强制send事件参数类型和post事件参数类型
+
+- Functional，强制入参和返回值类型
+
+- WorkerChannel
+
+- 禁止使用self. 在webworker中调用，会导致不可控的问题
+
+- ES6 Class +  TypeScript 装饰器
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
    
