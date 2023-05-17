@@ -1,0 +1,2 @@
+使用mapped-types对对象进行Proxy和wrapper
+https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types
