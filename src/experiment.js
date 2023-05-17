@@ -16,6 +16,18 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AccessibleWorkerFactory = exports.ChannelWorkerDefinition = void 0;
+var funcs = {
+    add: function (a, b) { return a + b; },
+    sub: function (a, b) { return Promise.resolve(1); }
+};
+function proxify(o) {
+    return o;
+}
+var b = proxify(funcs);
+// b.add(1, 2).then(res => console.log(res))
+// b.sub(1, 2).then(r => r)
+console.log(b.add(1, 2));
+console.log(b.sub(1, 2));
 var ChannelWorkerClient = /** @class */ (function () {
     function ChannelWorkerClient() {
     }
@@ -31,6 +43,9 @@ var ChannelWorkerDefinition = /** @class */ (function () {
     function ChannelWorkerDefinition() {
         throw new Error('You should never init this class');
     }
+    ChannelWorkerDefinition.prototype.postMessage = function (data) {
+        self.postMessage(data);
+    };
     return ChannelWorkerDefinition;
 }());
 exports.ChannelWorkerDefinition = ChannelWorkerDefinition;
@@ -39,20 +54,21 @@ var MyWorker = /** @class */ (function (_super) {
     function MyWorker() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    MyWorker.prototype.send = function (data) {
-    };
-    MyWorker.prototype.subscribe = function (event) {
+    MyWorker.prototype.onmessage = function (event) {
     };
     return MyWorker;
 }(ChannelWorkerDefinition));
 var AccessibleWorkerFactory = /** @class */ (function () {
     function AccessibleWorkerFactory() {
     }
-    AccessibleWorkerFactory.register = function (_t) {
+    AccessibleWorkerFactory.registerChannelWorker = function (_t) {
         return new ChannelWorkerClient();
+    };
+    AccessibleWorkerFactory.registerFunctionSet = function (funcSet) {
+        return proxify(funcSet);
     };
     return AccessibleWorkerFactory;
 }());
 exports.AccessibleWorkerFactory = AccessibleWorkerFactory;
-var a = AccessibleWorkerFactory.register(MyWorker);
-a.send('Ok');
+var a = AccessibleWorkerFactory.registerChannelWorker(MyWorker);
+a.send(22);

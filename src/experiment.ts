@@ -3,41 +3,36 @@ type PromiseWrapper<Value> =
     Value extends Promise<any> ? Value : Promise<Value>;
 
 
-type wrap<Func, Params> = (...arg: Params) => PromiseWrapper<ReturnType<Func>>
+type wrap<C, D> = (...arg: D extends Array<any> ? D: never) => C extends Func ? PromiseWrapper<ReturnType<C>> : never
 
 
 type Proxify<T> = {
-    [P in keyof T]: wrap<T[P], Parameters<T[P]>>;
+    [P in keyof T]: wrap<T[P], T[P] extends Func ? Parameters<T[P]> : []>;
 };
 
 
 type Func = (...args) => {}
 
 export  type  FunctionSet = {
-    [key: string | Symbol]: Func
+    [key: string | symbol]: Func
 }
 
 let funcs = {
     add: (a: number, b: number): number => a + b,
-    sub: (a: number, b: number): Promise<number> => Promise<number>.resolve(1)
+    sub: (a: number, b: number): Promise<number> => Promise.resolve(1)
 }
 
 function proxify<T>(o: T): Proxify<T> {
 
-    return
-}
-
-
-function wrapperFunctions(funcSet: FunctionSet): Proxify<FunctionSet> {
-    // 将function set 中的每个function进行包装，而后由proxify对类型进行封装后返回
-
-    return proxify(funcSet)
+    return o as Proxify<T>
 }
 
 
 let b = proxify(funcs)
-b.add(1, 2).then(res => console.log(res))
-b.sub(1, 2).then(r => r)
+// b.add(1, 2).then(res => console.log(res))
+// b.sub(1, 2).then(r => r)
+console.log(b.add(1, 2))
+console.log(b.sub(1, 2))
 /****************************************************/
 export type  SubscribeCallBack<I> = {
     // eslint-disable-next-line functional/no-return-void
@@ -90,11 +85,16 @@ class MyWorker extends ChannelWorkerDefinition<number, string> {
 
 
 export class AccessibleWorkerFactory {
-    public static register<I, O>(_t: new () => ChannelWorkerDefinition<I, O>): IChannelWorkerClient<O, I> {
+    public static registerChannelWorker<I, O>(_t: new () => ChannelWorkerDefinition<I, O>): IChannelWorkerClient<O, I> {
         return new ChannelWorkerClient<O, I>();
+    }
+
+    public static registerFunctionSet(funcSet: FunctionSet): Proxify<FunctionSet> {
+        return proxify(funcSet)
     }
 }
 
 
-const a = AccessibleWorkerFactory.register(MyWorker);
+const a = AccessibleWorkerFactory.registerChannelWorker(MyWorker);
+a.send(22)
 
