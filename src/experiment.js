@@ -66,6 +66,9 @@ var b = proxify(funcs);
 // b.add(2, 7).then(res => console.log(res))
 console.log(b.add(1, 2));
 console.log(b.sub(1, 2));
+/**
+ * 将Function Set 映射为此类的实例并返回给用户进行操作
+ */
 var FunctionSetWorkerProxy = /** @class */ (function () {
     function FunctionSetWorkerProxy(f) {
         for (var k in f) {
@@ -88,6 +91,14 @@ var ChannelWorkerClient = /** @class */ (function () {
     };
     ChannelWorkerClient.prototype.subscribe = function (callBack) {
     };
+    ChannelWorkerClient.prototype.on = function (ev, listener) {
+    };
+    ChannelWorkerClient.prototype.emit = function (ev) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+    };
     return ChannelWorkerClient;
 }());
 // eslint-disable-next-line functional/no-class
@@ -95,8 +106,11 @@ var ChannelWorkerDefinition = /** @class */ (function () {
     function ChannelWorkerDefinition() {
         throw new Error('You should never init this class');
     }
-    ChannelWorkerDefinition.prototype.postMessage = function (data) {
-        self.postMessage(data);
+    ChannelWorkerDefinition.prototype.emit = function (ev) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
     };
     return ChannelWorkerDefinition;
 }());
@@ -107,6 +121,7 @@ var MyWorker = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     MyWorker.prototype.onmessage = function (event) {
+        this.emit('hh', '2');
     };
     return MyWorker;
 }(ChannelWorkerDefinition));
@@ -158,4 +173,3 @@ var c = AccessibleWorkerFactory.registerFunctionSet({
     }); }); }
 });
 c.go();
-a.send(666);
