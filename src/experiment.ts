@@ -53,7 +53,10 @@ export interface IChannelWorkerClient<I, O> {
     send(data: O): void;
 }
 
-class FunctionSetWorkerProxy{
+/**
+ * 将Function Set 映射为此类的实例并返回给用户进行操作
+ */
+class FunctionSetWorkerProxy {
     constructor(f: FunctionSet) {
         for (const k in f) {
             const e = f[k];
