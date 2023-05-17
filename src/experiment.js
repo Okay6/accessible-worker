@@ -16,9 +16,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AccessibleWorkerFactory = exports.ChannelWorkerDefinition = void 0;
+var hash_it_1 = require("hash-it");
 var funcs = {
     add: function (a, b) { return a + b; },
-    sub: function (a, b) { return Promise.resolve(1); }
+    sub: function (a, b) { return Promise.resolve(a - b); }
 };
 function proxify(o) {
     return o;
@@ -26,6 +27,7 @@ function proxify(o) {
 var b = proxify(funcs);
 // b.add(1, 2).then(res => console.log(res))
 // b.sub(1, 2).then(r => r)
+// b.add(2, 7).then(res => console.log(res))
 console.log(b.add(1, 2));
 console.log(b.sub(1, 2));
 var ChannelWorkerClient = /** @class */ (function () {
@@ -60,8 +62,9 @@ var MyWorker = /** @class */ (function (_super) {
 }(ChannelWorkerDefinition));
 /*****************************************************************************/
 /**
- *  AccessibleWorkerFactory负责注册,存储worker实例
- *
+ *  AccessibleWorkerFactory负责注册,  存储worker实例
+ *  AccessibleWorkerFactory应为单例模式
+ *  根使用类型作为参数获取Factory提供的实例进行使用
  *
  *
  */
@@ -69,14 +72,35 @@ var MyWorker = /** @class */ (function (_super) {
 var AccessibleWorkerFactory = /** @class */ (function () {
     function AccessibleWorkerFactory() {
     }
+    /**
+     * 根据ChannelWorkerDefinition构造Worker
+     * @param _t
+     */
     AccessibleWorkerFactory.registerChannelWorker = function (_t) {
+        /**
+         * 应该存储到存储结构中，后面使用fetch instance获取指定实例,
+         *
+         */
+        console.log((0, hash_it_1.default)(_t));
         return new ChannelWorkerClient();
     };
+    /**
+     * 将提供的Function Set注册到 AccessibleWorkerFactory 函数表
+     *
+     */
     AccessibleWorkerFactory.registerFunctionSet = function (funcSet) {
+        /**
+         * 该存储到存储结构中，后面使用fetch instance获取指定实例
+         */
+        console.log((0, hash_it_1.default)(funcSet));
         return proxify(funcSet);
     };
     return AccessibleWorkerFactory;
 }());
 exports.AccessibleWorkerFactory = AccessibleWorkerFactory;
 var a = AccessibleWorkerFactory.registerChannelWorker(MyWorker);
+AccessibleWorkerFactory.registerFunctionSet(funcs);
+AccessibleWorkerFactory.registerFunctionSet({
+    go: function () { return console.log('go'); }
+});
 a.send(666);
