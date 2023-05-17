@@ -1,13 +1,13 @@
 const path = require("path");
 
 module.exports = {
-    entry: "./src/worker.ts",
+    entry: "./src/experiment.ts",
     experiments: {
         outputModule: true,
     },
     output: {
         filename: "[name].js",
-        path: path.resolve(__dirname, "dist"),
+        path: path.resolve(__dirname, "src/worker/modules"),
         library: {
             type: "module"
         }

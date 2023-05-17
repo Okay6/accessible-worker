@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="../../dist/main.js" type="module"></script>
+        <script src="./modules/main.js" type="module"></script>
     </head>
     <body>
         <button id="generate-uuid">Generate UUID</button>
         <p id="uuid"></p>
         <script>
-             const worker = new Worker('./worker.js',{type:'module'})
-             worker.onmessage = (e)=>{
-                if(uuidP) {
-                        uuidP.innerText = e.data
-                    }
-             }
-             const btn  = document.getElementById('generate-uuid');
-             const uuidP = document.getElementById('uuid')
-             if(btn){
-                btn.addEventListener('click',()=>{
-                    worker.postMessage('getUUID')
-                })
-             }
+             // const worker = new Worker('./worker.js',{type:'module'})
+             // worker.onmessage = (e)=>{
+             //    if(uuidP) {
+             //            uuidP.innerText = e.data
+             //        }
+             // }
+             // const btn  = document.getElementById('generate-uuid');
+             // const uuidP = document.getElementById('uuid')
+             // if(btn){
+             //    btn.addEventListener('click',()=>{
+             //        worker.postMessage('getUUID')
+             //    })
+             // }
         </script>
     </body>
    

@@ -17,7 +17,7 @@ type Proxify<T> = {
 };
 
 
-type Func = (...args) => any|void
+type Func = (...args: never[]) => never | void
 
 export  type  FunctionSet = {
     [key: string | symbol]: Func
@@ -53,6 +53,20 @@ export interface IChannelWorkerClient<I, O> {
     send(data: O): void;
 }
 
+class FunctionSetWorkerProxy{
+    constructor(f: FunctionSet) {
+        for (const k in f) {
+            const e = f[k];
+            console.log(e.toString());
+            (this as unknown as FunctionSet)[k] = e
+        }
+    }
+}
+
+/**
+ * Channel Worker Client，并不导出给User使用，对外只暴露IChannelWorkerClient接口
+ * Channel Worker Client Web Worker 实例
+ */
 class ChannelWorkerClient<I, O> implements IChannelWorkerClient<I, O> {
     send(data: O): void {
         console.log(data)
@@ -123,13 +137,17 @@ export class AccessibleWorkerFactory {
          * 该存储到存储结构中，后面使用fetch instance获取指定实例
          */
         console.log(hash(funcSet))
-        return proxify(funcSet)
+        const f = new FunctionSetWorkerProxy(funcSet)
+
+        // return proxify(funcSet)
+        return f as Proxify<T>
     }
 }
 
 const a = AccessibleWorkerFactory.registerChannelWorker(MyWorker);
 AccessibleWorkerFactory.registerFunctionSet(funcs)
-AccessibleWorkerFactory.registerFunctionSet({
-    go: () => console.log('go')
+const c = AccessibleWorkerFactory.registerFunctionSet({
+    go: async () => console.log('go')
 })
+c.go()
 a.send(666)
