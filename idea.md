@@ -44,9 +44,19 @@
 
 - ES6 Class +  TypeScript 装饰器
 
-  
+## Function Copy
 
+- 使用 Function.toString()  获取函数Definition
+- 对函数进行检查，查看是否符合Web Worker Inner Function 的标准
+- 将符合标准的函数进行处理后以字符串形式保存
+- Channel Worker 描述类中的类级别属性需要copy到worker,js中作为全局变量
+- 分别针对Channel和 Function 创建通信终端
+- Channel: Server  <-> Client => Channel ( 需要参考Rxjs，Observable实现 )
+- Function: Server  <-> Client => Promise<T>
+- Description Class, 描述类，利用metadata描述worker.js 定义
+- 
 
+ 
 
 
 
