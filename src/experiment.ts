@@ -3,7 +3,7 @@ type PromiseWrapper<Value> =
     Value extends Promise<any> ? Value : Promise<Value>;
 
 
-type wrap<C, D> = (...arg: D extends Array<any> ? D: never) => C extends Func ? PromiseWrapper<ReturnType<C>> : never
+type wrap<C, D extends Array<any>> = (...arg: D) => C extends Func ? PromiseWrapper<ReturnType<C>> : never
 
 
 type Proxify<T> = {
@@ -31,6 +31,7 @@ function proxify<T>(o: T): Proxify<T> {
 let b = proxify(funcs)
 // b.add(1, 2).then(res => console.log(res))
 // b.sub(1, 2).then(r => r)
+// b.add(2,7).then(res => console.log(res))
 console.log(b.add(1, 2))
 console.log(b.sub(1, 2))
 /****************************************************/
@@ -83,18 +84,26 @@ class MyWorker extends ChannelWorkerDefinition<number, string> {
 
 }
 
+/*****************************************************************************/
+/**
+ *  AccessibleWorkerFactory负责注册,存储worker实例
+ *
+ *
+ *
+ */
+
+/*****************************************************************************/
 
 export class AccessibleWorkerFactory {
     public static registerChannelWorker<I, O>(_t: new () => ChannelWorkerDefinition<I, O>): IChannelWorkerClient<O, I> {
         return new ChannelWorkerClient<O, I>();
     }
 
-    public static registerFunctionSet(funcSet: FunctionSet): Proxify<FunctionSet> {
+    public static registerFunctionSet<T extends FunctionSet>(funcSet: T): Proxify<T> {
         return proxify(funcSet)
     }
 }
 
-
 const a = AccessibleWorkerFactory.registerChannelWorker(MyWorker);
-a.send(22)
 
+a.send(666)

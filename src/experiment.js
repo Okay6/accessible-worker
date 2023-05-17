@@ -58,6 +58,14 @@ var MyWorker = /** @class */ (function (_super) {
     };
     return MyWorker;
 }(ChannelWorkerDefinition));
+/*****************************************************************************/
+/**
+ *  AccessibleWorkerFactory负责注册,存储worker实例
+ *
+ *
+ *
+ */
+/*****************************************************************************/
 var AccessibleWorkerFactory = /** @class */ (function () {
     function AccessibleWorkerFactory() {
     }
@@ -71,4 +79,4 @@ var AccessibleWorkerFactory = /** @class */ (function () {
 }());
 exports.AccessibleWorkerFactory = AccessibleWorkerFactory;
 var a = AccessibleWorkerFactory.registerChannelWorker(MyWorker);
-a.send(22);
+a.send(666);
