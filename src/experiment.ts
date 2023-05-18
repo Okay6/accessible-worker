@@ -95,16 +95,17 @@ export interface IChannelWorkerClient<ListenEvents extends EventsMap, EmitEvents
     emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...args: EventParams<EmitEvents, Ev>): void;
 }
 
-
 /**
  * 将Function Set 映射为此类的实例并返回给用户进行操作
  */
 class FunctionSetWorkerProxy {
     constructor(f: FunctionSet) {
         for (const k in f) {
-            const e = f[k];
-            console.log(e.toString());
-            (this as unknown as FunctionSet)[k] = e
+            const e: Function = f[k] as Function;
+            (this as unknown as FunctionSet)[k] = (...args) => {
+                const res = e.call(e, ...args)
+                return Promise.resolve(res)
+            }
         }
     }
 }
@@ -114,13 +115,6 @@ class FunctionSetWorkerProxy {
  * Channel Worker Client Web Worker 实例
  */
 class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements IChannelWorkerClient<I, O> {
-
-    send(data: O): void {
-        console.log(data)
-    }
-
-    subscribe(callBack: SubscribeCallBack<I>): void {
-    }
 
     on<Ev extends UserEventNames<I>>(ev: Ev, listener: UserListener<I, Ev>): void {
 
@@ -137,7 +131,8 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
 }
 
 // eslint-disable-next-line functional/no-class
-export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap, EmitEvents extends EventsMap> {
+export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap,
+    EmitEvents extends EventsMap> {
 
     constructor() {
         throw new Error('You should never init this class')
@@ -162,11 +157,11 @@ export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap, Em
 
 
 interface InputEvents {
-    CUSTOMER_INPUT_EVENT: (a: string) => void
+    CUSTOMER_TO_SERVER_EVENT: (a: string) => void
 }
 
 interface OutputEvents {
-    CUSTOMER_EMIT_EVENT: (a: string) => void
+    CUSTOMER_TO_CLIENT_EVENT: (a: string) => void
 }
 
 class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
@@ -190,13 +185,13 @@ export class AccessibleWorkerFactory {
      * 根据ChannelWorkerDefinition构造Worker
      * @param _t
      */
-    public static registerChannelWorker<I extends EventsMap, O extends EventsMap>(_t: new () => ChannelWorkerDefinition<I, O>): IChannelWorkerClient<I, O> {
+    public static registerChannelWorker<I extends EventsMap, O extends EventsMap>(_t: new () => ChannelWorkerDefinition<I, O>): IChannelWorkerClient<O, I> {
         /**
          * 应该存储到存储结构中，后面使用fetch instance获取指定实例,
          *
          */
         console.log(hash(_t))
-        return new ChannelWorkerClient<I, O>();
+        return new ChannelWorkerClient<O, I>();
     }
 
     /**
@@ -213,15 +208,29 @@ export class AccessibleWorkerFactory {
         // return proxify(funcSet)
         return f as Proxify<T>
     }
+
+    public static getChannelWorkerClient<I extends EventsMap, O extends EventsMap>(_t: new () => ChannelWorkerDefinition<I, O>):
+        IChannelWorkerClient<I, O> {
+        return null as any
+    }
+
+    public static getWorkerEnabledFunctionSet<T extends FunctionSet>(funcSet: T): Proxify<T> {
+        return null as any
+    }
+
 }
 
 const a = AccessibleWorkerFactory.registerChannelWorker(MyWorker);
 AccessibleWorkerFactory.registerFunctionSet(funcs)
 const c = AccessibleWorkerFactory.registerFunctionSet({
-    go: async () => console.log('go')
+    go: async () => console.log('go'),
+    show: (msg: string): void => console.log(msg),
+    add: (a: number, b: number): number => a + b
 })
 c.go().then()
-a.emit<'CUSTOMER_EMIT_EVENT'>('CUSTOMER_EMIT_EVENT', 'Event Communication')
-a.on<'CUSTOMER_INPUT_EVENT'>('CUSTOMER_INPUT_EVENT', (res: string) => {
+c.show('HH').then()
+c.add(100, 200).then(r => console.log('====calculate result====', r))
+a.emit<'CUSTOMER_TO_SERVER_EVENT'>('CUSTOMER_TO_SERVER_EVENT', 'Message come from client . . .')
+a.on<'CUSTOMER_TO_CLIENT_EVENT'>('CUSTOMER_TO_CLIENT_EVENT', (res: string) => {
 
 })

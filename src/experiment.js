@@ -50,6 +50,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AccessibleWorkerFactory = exports.ChannelWorkerDefinition = void 0;
 var hash_it_1 = require("hash-it");
@@ -71,10 +80,20 @@ console.log(b.sub(1, 2));
  */
 var FunctionSetWorkerProxy = /** @class */ (function () {
     function FunctionSetWorkerProxy(f) {
-        for (var k in f) {
+        var _loop_1 = function (k) {
             var e = f[k];
-            console.log(e.toString());
-            this[k] = e;
+            this_1[k] = function () {
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i] = arguments[_i];
+                }
+                var res = e.call.apply(e, __spreadArray([e], args, false));
+                return Promise.resolve(res);
+            };
+        };
+        var this_1 = this;
+        for (var k in f) {
+            _loop_1(k);
         }
     }
     return FunctionSetWorkerProxy;
@@ -86,11 +105,6 @@ var FunctionSetWorkerProxy = /** @class */ (function () {
 var ChannelWorkerClient = /** @class */ (function () {
     function ChannelWorkerClient() {
     }
-    ChannelWorkerClient.prototype.send = function (data) {
-        console.log(data);
-    };
-    ChannelWorkerClient.prototype.subscribe = function (callBack) {
-    };
     ChannelWorkerClient.prototype.on = function (ev, listener) {
     };
     //noinspection all
@@ -162,6 +176,12 @@ var AccessibleWorkerFactory = /** @class */ (function () {
         // return proxify(funcSet)
         return f;
     };
+    AccessibleWorkerFactory.getChannelWorkerClient = function (_t) {
+        return null;
+    };
+    AccessibleWorkerFactory.getWorkerEnabledFunctionSet = function (funcSet) {
+        return null;
+    };
     return AccessibleWorkerFactory;
 }());
 exports.AccessibleWorkerFactory = AccessibleWorkerFactory;
@@ -170,9 +190,13 @@ AccessibleWorkerFactory.registerFunctionSet(funcs);
 var c = AccessibleWorkerFactory.registerFunctionSet({
     go: function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
         return [2 /*return*/, console.log('go')];
-    }); }); }
+    }); }); },
+    show: function (msg) { return console.log(msg); },
+    add: function (a, b) { return a + b; }
 });
 c.go().then();
-a.emit('CUSTOMER_EMIT_EVENT', 'Event Communication');
-a.on('CUSTOMER_INPUT_EVENT', function (res) {
+c.show('HH').then();
+c.add(100, 200).then(function (r) { return console.log('====calculate result====', r); });
+a.emit('CUSTOMER_TO_SERVER_EVENT', 'Message come from client . . .');
+a.on('CUSTOMER_TO_CLIENT_EVENT', function (res) {
 });
