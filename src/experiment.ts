@@ -90,6 +90,7 @@ export type  SubscribeCallBack<I> = {
 export interface IChannelWorkerClient<ListenEvents extends EventsMap, EmitEvents extends EventsMap> {
     on<Ev extends UserEventNames<ListenEvents>>(ev: Ev, listener: UserListener<ListenEvents, Ev>): void;
     // Parameters 在 Web Storm 中 报错 Rest parameter must be an array type or a generic with array constraint，但编译通诺，暂时忽略
+    //noinspection all
     emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...args: EventParams<EmitEvents, Ev>): void;
 }
 
@@ -123,7 +124,7 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
     on<Ev extends UserEventNames<I>>(ev: Ev, listener: UserListener<I, Ev>): void {
 
     }
-
+    //noinspection all
     emit<Ev extends EventNames<O>>(ev: Ev, ...args: EventParams<O, Ev>): void {
     }
 
@@ -136,7 +137,7 @@ export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap, Em
     constructor() {
         throw new Error('You should never init this class')
     }
-
+    //noinspection all
     emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...args: EventParams<EmitEvents, Ev>): void {
 
     }
