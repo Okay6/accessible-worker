@@ -1,2 +1,4 @@
 使用mapped-types对对象进行Proxy和wrapper
 https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types
+实现具有类型约束的强类型decorator
+https://zhuanlan.zhihu.com/p/417301247

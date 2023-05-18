@@ -1,6 +1,7 @@
-import {WorkerModule} from './modules/main.js'
+import {AccessibleWorkerModule} from './modules/accessible_worker_module.js'
+
 
 self.onmessage = (e)=>{
-    console.log(WorkerModule['var'])
-    self.postMessage(WorkerModule.uuidv4())
+    console.log(AccessibleWorkerModule['var'])
+    self.postMessage(AccessibleWorkerModule.uuidv4())
 }

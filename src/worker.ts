@@ -1,4 +1,4 @@
-import { WorkerModule } from "./worker_module";
+import { AccessibleWorkerModule } from "./worker_module";
 
 /**
  * 需要定义一个此Worker引用的全局ES Module，在Web Worker(.js)woker中引入第三方库
@@ -33,22 +33,24 @@ export class AccessibleChannelWorker {
      * 带有指定装饰器的类级别属性将会被编译为Web Worker(.js)全局方法
      */
     @first()
-    run() {
+    run(msg:string) {
         // this引用取消(this.)，直接转为全局引用
         this.workerVariable = 'changed_variable';
         //  
         this.postMessage()
-        console.log(WorkerModule.uuidv4())
-        console.log(WorkerModule.var + ('1' as unknown as 1))
-        console.log(WorkerModule.a + WorkerModule.b)
+        console.log(AccessibleWorkerModule.uuidv4())
+        console.log(AccessibleWorkerModule.var + ('1' as unknown as 1))
+        console.log(AccessibleWorkerModule.a + AccessibleWorkerModule.b)
         type c = string;
         let a:number;
         a= 1;
         let b:number;
         b = 20;
         console.log
-
+        console.log(msg.length)
+        console.log(msg + 'QWERTY')
         self.postMessage('sss')
+        new AccessibleWorkerModule.MyOwnClass().say('sssss')
     }
 
     postMessage() {
@@ -71,5 +73,5 @@ export class AccessibleFunctionalWorker {
     }
 }
 
-// const s = new AccessibleChannelWorker()
-// s.run()
+const s = new AccessibleChannelWorker()
+s.run('Message for run method')

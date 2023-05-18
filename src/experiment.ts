@@ -1,4 +1,11 @@
 import hash from 'hash-it';
+import {
+    AccessibleWorker,
+    AsyncMethodDecorator,
+    PrimaryKey,
+    TestMethodDecorator,
+    WorkerMethodParam
+} from "./decorator/wroker_definition";
 
 /**
  * An events map is an interface that maps event names to their value, which
@@ -90,9 +97,11 @@ export type  SubscribeCallBack<I> = {
 export interface IChannelWorkerClient<ListenEvents extends EventsMap, EmitEvents extends EventsMap> {
     on<Ev extends UserEventNames<ListenEvents>>(ev: Ev, listener: UserListener<ListenEvents, Ev>): void;
 
-    // Parameters 在 Web Storm 中 报错 Rest parameter must be an array type or a generic with array constraint，但编译通诺，暂时忽略
+    // Parameters 在 Web Storm 中 报错 Rest parameter must be an array type or a generic with array constraint，但编译通过，暂时忽略
     //noinspection all
     emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...args: EventParams<EmitEvents, Ev>): void;
+
+    say(msg:string):void;
 }
 
 /**
@@ -124,6 +133,12 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
     emit<Ev extends EventNames<O>>(ev: Ev, ...args: EventParams<O, Ev>): void {
 
         console.log('=====EMIT=====', args)
+
+    }
+
+    @TestMethodDecorator()
+    say(@WorkerMethodParam() msg:string){
+        console.log(msg)
 
     }
 
@@ -161,12 +176,19 @@ interface InputEvents {
 }
 
 interface OutputEvents {
-    CUSTOMER_TO_CLIENT_EVENT: (a: string) => void
+    CUSTOMER_TO_CLIENT_EVENT: ( a: string) => void
 }
 
+
+@AccessibleWorker()
 class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
 
-
+    @PrimaryKey()
+    say = 'ss'
+    @AsyncMethodDecorator()
+    h(@WorkerMethodParam() s:number):Promise<number>{
+       return Promise.resolve(1)
+    }
 }
 
 /*****************************************************************************/
@@ -198,7 +220,8 @@ export class AccessibleWorkerFactory {
      * 将提供的Function Set注册到 AccessibleWorkerFactory 函数表
      *
      */
-    public static registerFunctionSet<T extends FunctionSet>(funcSet: T): Proxify<T> {
+
+    public static registerFunctionSet<T extends FunctionSet>( funcSet: T): Proxify<T> {
         /**
          * 该存储到存储结构中，后面使用fetch instance获取指定实例
          */

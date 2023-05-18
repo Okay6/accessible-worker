@@ -1,7 +1,10 @@
 const path = require("path");
 
 module.exports = {
-    entry: "./src/experiment.ts",
+    entry: {
+        "main": "./src/experiment.ts",
+        "accessible_worker_module": "./src/worker_module.ts"
+    },
     experiments: {
         outputModule: true,
     },
@@ -18,8 +21,8 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,    
-                use: "ts-loader",   
+                test: /\.tsx?$/,
+                use: "ts-loader",
                 exclude: "/node-modules/"
             }
         ]
