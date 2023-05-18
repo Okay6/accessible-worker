@@ -167,9 +167,12 @@ class Person {
 - ```accessible_worker_module.js``` 如果需要引入第三方依赖或者自身依赖，需要在构建工具中配置单独的entry
 - 所有模块导入都需要在AccessibleModule中先导入，然后以 ```AccessibleModule.uuid()``` 的方式进行使用
 
+## Reflect Metadata
+
+-  使用```reflect-metadata``` 配合 decorator 对class method property 进行元数据的获取与定义
+-  
 
 
- 
 
 
 

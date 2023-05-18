@@ -3,6 +3,7 @@ import {
     AccessibleWorker,
     AsyncMethodDecorator,
     PrimaryKey,
+    SubscribeMessage,
     TestMethodDecorator,
     WorkerMethodParam
 } from "./decorator/wroker_definition";
@@ -101,7 +102,7 @@ export interface IChannelWorkerClient<ListenEvents extends EventsMap, EmitEvents
     //noinspection all
     emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...args: EventParams<EmitEvents, Ev>): void;
 
-    say(msg:string):void;
+    say(msg: string): void;
 }
 
 /**
@@ -137,7 +138,7 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
     }
 
     @TestMethodDecorator()
-    say(@WorkerMethodParam() msg:string){
+    say(@WorkerMethodParam() msg: string) {
         console.log(msg)
 
     }
@@ -173,10 +174,11 @@ export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap,
 
 interface InputEvents {
     CUSTOMER_TO_SERVER_EVENT: (a: string) => void
+    CUSTOMER_TO_SERVER_EVENT01: (a: string) => void
 }
 
 interface OutputEvents {
-    CUSTOMER_TO_CLIENT_EVENT: ( a: string) => void
+    CUSTOMER_TO_CLIENT_EVENT: (a: string) => void
 }
 
 
@@ -185,9 +187,15 @@ class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
 
     @PrimaryKey()
     say = 'ss'
+
     @AsyncMethodDecorator()
-    h(@WorkerMethodParam() s:number):Promise<number>{
-       return Promise.resolve(1)
+    h(@WorkerMethodParam() s: number): Promise<number> {
+        return Promise.resolve(1)
+    }
+
+    @SubscribeMessage<InputEvents>('CUSTOMER_TO_SERVER_EVENT')
+    onMessage() {
+
     }
 }
 
@@ -221,7 +229,7 @@ export class AccessibleWorkerFactory {
      *
      */
 
-    public static registerFunctionSet<T extends FunctionSet>( funcSet: T): Proxify<T> {
+    public static registerFunctionSet<T extends FunctionSet>(funcSet: T): Proxify<T> {
         /**
          * 该存储到存储结构中，后面使用fetch instance获取指定实例
          */

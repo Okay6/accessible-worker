@@ -10,11 +10,12 @@ type ValueMatchedKey<Type, Value> = {
     [Key in keyof Type]: Type[Key] extends Value ? Key : never;
 }[keyof Type];
 
+
 /*******************************************************/
 export const PrimaryKey =
     () =>
         <ChannelWorkerDefinition>(
-            entityPrototype: ChannelWorkerDefinition,
+            target: ChannelWorkerDefinition,
             field: ValueMatchedKey<ChannelWorkerDefinition, string>
         ) => {
             // ...
@@ -22,7 +23,7 @@ export const PrimaryKey =
 
 
 export const AsyncMethodDecorator = () => (
-    target: object,
+    target: ChannelWorkerDefinition<EventsMap, EventsMap>,
     propertyKey: PropertyKey,
     descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<number>>
 ) => {
@@ -42,6 +43,16 @@ export const AsyncMethodDecorator = () => (
 
 export const TestMethodDecorator = () => (
     target: object,
+    propertyKey: PropertyKey,
+    descriptor: TypedPropertyDescriptor<(...args: any[]) => any>
+) => {
+    // ...
+
+};
+
+
+export const SubscribeMessage = <E extends EventsMap>(msg: keyof E) => (
+    target: ChannelWorkerDefinition<E, EventsMap>,
     propertyKey: PropertyKey,
     descriptor: TypedPropertyDescriptor<(...args: any[]) => any>
 ) => {
