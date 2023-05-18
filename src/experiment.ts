@@ -5,7 +5,7 @@ import hash from 'hash-it';
  * represents the type of the `on` listener.
  */
 export interface EventsMap {
-    [key: string]: Func
+    [key: string]: any
 }
 
 /**
@@ -89,6 +89,7 @@ export type  SubscribeCallBack<I> = {
 
 export interface IChannelWorkerClient<ListenEvents extends EventsMap, EmitEvents extends EventsMap> {
     on<Ev extends UserEventNames<ListenEvents>>(ev: Ev, listener: UserListener<ListenEvents, Ev>): void;
+
     // Parameters 在 Web Storm 中 报错 Rest parameter must be an array type or a generic with array constraint，但编译通诺，暂时忽略
     //noinspection all
     emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...args: EventParams<EmitEvents, Ev>): void;
@@ -124,8 +125,12 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
     on<Ev extends UserEventNames<I>>(ev: Ev, listener: UserListener<I, Ev>): void {
 
     }
+
     //noinspection all
     emit<Ev extends EventNames<O>>(ev: Ev, ...args: EventParams<O, Ev>): void {
+
+        console.log('=====EMIT=====', args)
+
     }
 
 
@@ -136,21 +141,35 @@ export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap, Em
 
     constructor() {
         throw new Error('You should never init this class')
+
     }
+
     //noinspection all
     emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...args: EventParams<EmitEvents, Ev>): void {
 
     }
 
+    // @Subscribe<'PRC_RESOLVE'>('PRC_RESOLVE')
+    // customerEvent(@EventData data: { msg: string }) {
+    //     /**
+    //      * customer logic
+    //      */
+    //
+    //     this.emit()
+    // }
 
 }
 
 
-class MyWorker extends ChannelWorkerDefinition<{ 'hh': () => {} }, { 'hh': (a: string) => {} }> {
+interface InputEvents {
+    CUSTOMER_INPUT_EVENT: (a: string) => void
+}
 
-    onmessage(event: MessageEvent<number>): void {
-        this.emit<'hh'>('hh', '2')
-    }
+interface OutputEvents {
+    CUSTOMER_EMIT_EVENT: (a: string) => void
+}
+
+class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
 
 
 }
@@ -171,13 +190,13 @@ export class AccessibleWorkerFactory {
      * 根据ChannelWorkerDefinition构造Worker
      * @param _t
      */
-    public static registerChannelWorker<I extends EventsMap, O extends EventsMap>(_t: new () => ChannelWorkerDefinition<I, O>): IChannelWorkerClient<O, I> {
+    public static registerChannelWorker<I extends EventsMap, O extends EventsMap>(_t: new () => ChannelWorkerDefinition<I, O>): IChannelWorkerClient<I, O> {
         /**
          * 应该存储到存储结构中，后面使用fetch instance获取指定实例,
          *
          */
         console.log(hash(_t))
-        return new ChannelWorkerClient<O, I>();
+        return new ChannelWorkerClient<I, O>();
     }
 
     /**
@@ -201,4 +220,8 @@ AccessibleWorkerFactory.registerFunctionSet(funcs)
 const c = AccessibleWorkerFactory.registerFunctionSet({
     go: async () => console.log('go')
 })
-c.go()
+c.go().then()
+a.emit<'CUSTOMER_EMIT_EVENT'>('CUSTOMER_EMIT_EVENT', 'Event Communication')
+a.on<'CUSTOMER_INPUT_EVENT'>('CUSTOMER_INPUT_EVENT', (res: string) => {
+
+})

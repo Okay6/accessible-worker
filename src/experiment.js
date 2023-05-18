@@ -93,11 +93,13 @@ var ChannelWorkerClient = /** @class */ (function () {
     };
     ChannelWorkerClient.prototype.on = function (ev, listener) {
     };
+    //noinspection all
     ChannelWorkerClient.prototype.emit = function (ev) {
         var args = [];
         for (var _i = 1; _i < arguments.length; _i++) {
             args[_i - 1] = arguments[_i];
         }
+        console.log('=====EMIT=====', args);
     };
     return ChannelWorkerClient;
 }());
@@ -106,6 +108,7 @@ var ChannelWorkerDefinition = /** @class */ (function () {
     function ChannelWorkerDefinition() {
         throw new Error('You should never init this class');
     }
+    //noinspection all
     ChannelWorkerDefinition.prototype.emit = function (ev) {
         var args = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -120,9 +123,6 @@ var MyWorker = /** @class */ (function (_super) {
     function MyWorker() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    MyWorker.prototype.onmessage = function (event) {
-        this.emit('hh', '2');
-    };
     return MyWorker;
 }(ChannelWorkerDefinition));
 /*****************************************************************************/
@@ -172,4 +172,7 @@ var c = AccessibleWorkerFactory.registerFunctionSet({
         return [2 /*return*/, console.log('go')];
     }); }); }
 });
-c.go();
+c.go().then();
+a.emit('CUSTOMER_EMIT_EVENT', 'Event Communication');
+a.on('CUSTOMER_INPUT_EVENT', function (res) {
+});
