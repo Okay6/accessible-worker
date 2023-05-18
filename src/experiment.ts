@@ -2,6 +2,7 @@ import hash from 'hash-it';
 import {
     AccessibleWorker,
     AsyncMethodDecorator,
+    MessageData,
     PrimaryKey,
     SubscribeMessage,
     TestMethodDecorator,
@@ -194,8 +195,8 @@ class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
     }
 
     @SubscribeMessage<InputEvents>('CUSTOMER_TO_SERVER_EVENT')
-    onMessage() {
-
+    onMessage(@MessageData() data: string) {
+     this.emit('CUSTOMER_TO_CLIENT_EVENT','33')
     }
 }
 

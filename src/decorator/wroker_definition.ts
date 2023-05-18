@@ -76,4 +76,7 @@ export const WorkerMethodParam = () => (target: Type<ChannelWorkerDefinition<Eve
 }
 
 
+export const MessageData = () => (target: Type<ChannelWorkerDefinition<EventsMap, EventsMap>>, name: PropertyKey, index: number) => {
 
+
+}
