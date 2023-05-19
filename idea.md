@@ -170,7 +170,21 @@ class Person {
 ## Reflect Metadata
 
 -  使用```reflect-metadata``` 配合 decorator 对class method property 进行元数据的获取与定义
--  
+
+## Endpoint 通信
+
+- 4 CustomEvent
+
+## Category
+
+- 在注册阶段，ChannelWorkerDefinition  将会被编译为Worker.js  (Server  端)
+- 在构造 ChannelWorkerClient  和 FunctionSetWorkerProxyClient阶段  (Client 端)
+- worker.js, 线程池,线程注册表全都都放在Client端中
+- 
+
+
+
+ 
 
 
 

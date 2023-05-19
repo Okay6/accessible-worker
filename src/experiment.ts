@@ -1,7 +1,6 @@
 import hash from 'hash-it';
 import {
     AccessibleWorker,
-    AsyncMethodDecorator,
     MessageData,
     PrimaryKey,
     SubscribeMessage,
@@ -109,7 +108,7 @@ export interface IChannelWorkerClient<ListenEvents extends EventsMap, EmitEvents
 /**
  * 将Function Set 映射为此类的实例并返回给用户进行操作
  */
-class FunctionSetWorkerProxy {
+class FunctionSetWorkerProxyClient {
     constructor(f: FunctionSet) {
         for (const k in f) {
             const e: Function = f[k] as Function;
@@ -183,20 +182,20 @@ interface OutputEvents {
 }
 
 
+/**
+ * 解析后，将为
+ */
+
 @AccessibleWorker()
 class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
 
     @PrimaryKey()
     say = 'ss'
 
-    @AsyncMethodDecorator()
-    h(@WorkerMethodParam() s: number): Promise<number> {
-        return Promise.resolve(1)
-    }
-
+    // 注册事件处理器
     @SubscribeMessage<InputEvents>('CUSTOMER_TO_SERVER_EVENT')
     onMessage(@MessageData() data: string) {
-     this.emit('CUSTOMER_TO_CLIENT_EVENT','33')
+        this.emit('CUSTOMER_TO_CLIENT_EVENT', '33')
     }
 }
 
@@ -235,7 +234,7 @@ export class AccessibleWorkerFactory {
          * 该存储到存储结构中，后面使用fetch instance获取指定实例
          */
         console.log(hash(funcSet))
-        const f = new FunctionSetWorkerProxy(funcSet)
+        const f = new FunctionSetWorkerProxyClient(funcSet)
 
         // return proxify(funcSet)
         return f as Proxify<T>
@@ -252,7 +251,7 @@ export class AccessibleWorkerFactory {
 
 }
 
-const a = AccessibleWorkerFactory.registerChannelWorker(MyWorker);
+const a = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyWorker);
 AccessibleWorkerFactory.registerFunctionSet(funcs)
 const c = AccessibleWorkerFactory.registerFunctionSet({
     go: async () => console.log('go'),
@@ -263,6 +262,7 @@ c.go().then()
 c.show('HH').then()
 c.add(100, 200).then(r => console.log('====calculate result====', r))
 a.emit<'CUSTOMER_TO_SERVER_EVENT'>('CUSTOMER_TO_SERVER_EVENT', 'Message come from client . . .')
+// on 即注册对应事件处理器
 a.on<'CUSTOMER_TO_CLIENT_EVENT'>('CUSTOMER_TO_CLIENT_EVENT', (res: string) => {
 
 })
