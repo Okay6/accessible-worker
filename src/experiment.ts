@@ -1,11 +1,10 @@
 import hash from 'hash-it';
 import {
     AccessibleWorker,
+    GlobalVariable,
     MessageData,
-    PrimaryKey,
-    SubscribeMessage,
-    TestMethodDecorator,
-    WorkerMethodParam
+    SubscribeMessage, WORKER_DEFINITION, WorkerConfig,
+    WorkerDefinition, WorkThread
 } from "./decorator/wroker_definition";
 
 /**
@@ -102,13 +101,15 @@ export interface IChannelWorkerClient<ListenEvents extends EventsMap, EmitEvents
     //noinspection all
     emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...args: EventParams<EmitEvents, Ev>): void;
 
-    say(msg: string): void;
 }
 
 /**
  * 将Function Set 映射为此类的实例并返回给用户进行操作
  */
-class FunctionSetWorkerProxyClient {
+class FunctionSetWorkerProxyClient<F extends FunctionSet> {
+    threadPool = new Map<number, WorkThread>()
+    taskQueue: Array<keyof F> = []
+
     constructor(f: FunctionSet) {
         for (const k in f) {
             const e: Function = f[k] as Function;
@@ -124,22 +125,26 @@ class FunctionSetWorkerProxyClient {
  * Channel Worker Client，并不导出给User使用，对外只暴露IChannelWorkerClient接口
  * Channel Worker Client Web Worker 实例
  */
+
 class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements IChannelWorkerClient<I, O> {
+    threadPool = new Map<number, WorkThread>();
+    taskQueue: Array<keyof O> = []
+    workerConfig!: WorkerConfig
+
+    private eventHandlerRecord: Record<string | symbol, Func> = {}
 
     on<Ev extends UserEventNames<I>>(ev: Ev, listener: UserListener<I, Ev>): void {
-
+        this.eventHandlerRecord[ev] = listener
     }
 
     //noinspection all
     emit<Ev extends EventNames<O>>(ev: Ev, ...args: EventParams<O, Ev>): void {
+        // 1. 查看threadPool 是否存在空闲线程
+        // 2. 如果存在，直接使用空闲线程
+        // 3. 如果不存在，查看WorkerConfig 的strategy，如果是PERFORMANCE，则创建新线程并提交任务
+        // 如果的strategy为MEMORY_SAVE，则将任务放入taskQueue，等待空闲线程调度
+        //
 
-        console.log('=====EMIT=====', args)
-
-    }
-
-    @TestMethodDecorator()
-    say(@WorkerMethodParam() msg: string) {
-        console.log(msg)
 
     }
 
@@ -149,7 +154,6 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
 // eslint-disable-next-line functional/no-class
 export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap,
     EmitEvents extends EventsMap> {
-
     constructor() {
         throw new Error('You should never init this class')
 
@@ -157,6 +161,10 @@ export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap,
 
     //noinspection all
     emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...args: EventParams<EmitEvents, Ev>): void {
+
+    }
+
+    terminalAll() {
 
     }
 
@@ -181,6 +189,8 @@ interface OutputEvents {
     CUSTOMER_TO_CLIENT_EVENT: (a: string) => void
 }
 
+type InferParameterType<E extends EventsMap, K extends keyof EventsMap> =
+    Parameters<E[K]> extends Array<any> ? Parameters<E[K]>[0] : never
 
 /**
  * 解析后，将为
@@ -189,14 +199,20 @@ interface OutputEvents {
 @AccessibleWorker()
 class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
 
-    @PrimaryKey()
-    say = 'ss'
+    @GlobalVariable<string>()
+    say!: string
+
 
     // 注册事件处理器
     @SubscribeMessage<InputEvents>('CUSTOMER_TO_SERVER_EVENT')
-    onMessage(@MessageData() data: string) {
+    async onMessage(@MessageData() data: InferParameterType<InputEvents, 'CUSTOMER_TO_SERVER_EVENT'>) {
         this.emit('CUSTOMER_TO_CLIENT_EVENT', '33')
+        this.say = data;
+        const self: any = {};
+        self.s = 1;
     }
+
+
 }
 
 /*****************************************************************************/
@@ -221,6 +237,9 @@ export class AccessibleWorkerFactory {
          *
          */
         console.log(hash(_t))
+        const workerDefinition: WorkerDefinition = Reflect.getOwnMetadata(WORKER_DEFINITION, _t) || {ttl: 10 * 3000}
+        console.log('=======WORKER DEFINITION========')
+        console.log(workerDefinition)
         return new ChannelWorkerClient<O, I>();
     }
 
@@ -234,7 +253,7 @@ export class AccessibleWorkerFactory {
          * 该存储到存储结构中，后面使用fetch instance获取指定实例
          */
         console.log(hash(funcSet))
-        const f = new FunctionSetWorkerProxyClient(funcSet)
+        const f = new FunctionSetWorkerProxyClient<T>(funcSet)
 
         // return proxify(funcSet)
         return f as Proxify<T>

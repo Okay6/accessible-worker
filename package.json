@@ -17,6 +17,9 @@
     "webpack-cli": "^5.1.1"
   },
   "dependencies": {
+    "@types/acorn": "^6.0.0",
+    "acorn": "^8.8.2",
+    "acorn-walk": "^8.2.0",
     "hash-it": "^6.0.0",
     "reflect-metadata": "^0.1.13",
     "uuid": "^9.0.0"

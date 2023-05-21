@@ -1,10 +1,33 @@
 import {ChannelWorkerDefinition, EventsMap} from "../experiment";
 import "reflect-metadata"
+import {Node, parse} from 'acorn'
+import {full} from 'acorn-walk'
 
-const requiredMetadataKey = Symbol("required")
+export interface WorkThread {
+
+}
+
+export const WORKER_DEFINITION = Symbol('WORKER_DEFINITION')
+
+export interface WorkerConfig {
+    ttl: number;
+    strategy: 'PERFORMANCE' | 'MEMORY_SAVE';
+    minActive: number;
+}
+
+export interface WorkerDefinition {
+    ttl: number
+}
 
 // regard as specific T constructor
 type Type<T> = new (...args: any[]) => T;
+
+export interface IdentifierNode {
+    type: 'Identifier';
+    start: number;
+    end: number;
+    name: string;
+}
 
 type ValueMatchedKey<Type, Value> = {
     [Key in keyof Type]: Type[Key] extends Value ? Key : never;
@@ -12,68 +35,72 @@ type ValueMatchedKey<Type, Value> = {
 
 
 /*******************************************************/
-export const PrimaryKey =
-    () =>
-        <ChannelWorkerDefinition>(
-            target: ChannelWorkerDefinition,
-            field: ValueMatchedKey<ChannelWorkerDefinition, string>
-        ) => {
-            // ...
-        };
-
-
-export const AsyncMethodDecorator = () => (
-    target: ChannelWorkerDefinition<EventsMap, EventsMap>,
-    propertyKey: PropertyKey,
-    descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<number>>
-) => {
-    // ...
-    let existingRequiredParameters: PropertyKey[] = Reflect.getOwnMetadata(requiredMetadataKey, target) || [];
-    console.log('===========Marked Parameters====')
-    console.log(existingRequiredParameters)
-
-    console.log('========Function Info Fetched From Decorator======')
-    const func: TypedPropertyDescriptor<(...args: any[]) => Promise<number>> | undefined =
-        Reflect.getOwnPropertyDescriptor(target, propertyKey)
-    if (func && func.value) {
-        console.log(func.value.toString())
-    }
-};
-
-
-export const TestMethodDecorator = () => (
-    target: object,
-    propertyKey: PropertyKey,
-    descriptor: TypedPropertyDescriptor<(...args: any[]) => any>
-) => {
-    // ...
-
-};
-
-
-export const SubscribeMessage = <E extends EventsMap>(msg: keyof E) => (
-    target: ChannelWorkerDefinition<E, EventsMap>,
-    propertyKey: PropertyKey,
-    descriptor: TypedPropertyDescriptor<(...args: any[]) => any>
-) => {
-    // ...
-
-};
-
 export const AccessibleWorker = () => {
     return (target: Type<ChannelWorkerDefinition<EventsMap, EventsMap>>) => {
-
-
+        const workerDefinition: WorkerDefinition = Reflect.getOwnMetadata(WORKER_DEFINITION, target) || {ttl: 10 * 3000}
+        workerDefinition.ttl = 10000
+        Reflect.defineMetadata(WORKER_DEFINITION, workerDefinition, target)
     }
 
 }
 
-export const WorkerMethodParam = () => (target: Type<ChannelWorkerDefinition<EventsMap, EventsMap>>, name: PropertyKey, index: number) => {
-    let existingRequiredParameters: PropertyKey[] = Reflect.getOwnMetadata(requiredMetadataKey, target) || [];
-    existingRequiredParameters.push(name);
-    Reflect.defineMetadata(requiredMetadataKey, existingRequiredParameters, target);
+export const GlobalVariable = <T>() =>
+    <ChannelWorkerDefinition>(
+        target: ChannelWorkerDefinition,
+        field: ValueMatchedKey<ChannelWorkerDefinition, T>
+    ) => {
 
-}
+
+    };
+
+
+export const SubscribeMessage = <E extends EventsMap>(msg: keyof E) => {
+    return (
+        target: ChannelWorkerDefinition<E, EventsMap>,
+        propertyKey: PropertyKey,
+        descriptor: TypedPropertyDescriptor<(...args: any[]) => any>
+    ) => {
+        const func = Reflect.getOwnPropertyDescriptor(target, propertyKey) as TypedPropertyDescriptor<(...args: any[]) => any>
+
+        console.log('==========method info==========')
+        if (func && func.value) {
+
+            const funcStr = 'function ' + func["value"].toString()
+            const thisExps: { start: number; end: number }[] = [];
+            full(parse(funcStr, {ecmaVersion: 2015}), (node: Node,
+                                                       state: any,
+                                                       type: string) => {
+                if (type === 'Identifier') {
+                    const identifierNode = node as IdentifierNode;
+                    if (identifierNode.name === 'self') {
+                        console.log(identifierNode)
+                        console.log(funcStr.substring(identifierNode.start, identifierNode.end))
+
+                    }
+                }
+                if (type === 'ThisExpression') {
+                    const identifierNode = node as IdentifierNode;
+                    thisExps.push({start:identifierNode.start,end:identifierNode.end})
+                }
+            })
+            const funcSplit  =funcStr.split('')
+            for(const thisExp of thisExps){
+                for(let i=0;i<=3;i++){
+                    funcSplit[thisExp.start + i] = 'self'[i]
+                }
+            }
+            console.log(funcSplit.join(''))
+        }
+        /**
+         * 1. 检查self. 引用操作, 发现即报错
+         * 2. this. 引用操作全部替换为self.
+         * 3.
+         *
+         */
+
+
+    };
+};
 
 
 export const MessageData = () => (target: Type<ChannelWorkerDefinition<EventsMap, EventsMap>>, name: PropertyKey, index: number) => {
