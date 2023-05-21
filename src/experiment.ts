@@ -3,8 +3,11 @@ import {
     AccessibleWorker,
     GlobalVariable,
     MessageData,
-    SubscribeMessage, WORKER_DEFINITION, WorkerConfig,
-    WorkerDefinition, WorkThread
+    SubscribeMessage,
+    WORKER_DEFINITION,
+    WorkerConfig,
+    WorkerDefinition,
+    WorkThread
 } from "./decorator/wroker_definition";
 
 /**
@@ -198,10 +201,18 @@ type InferParameterType<E extends EventsMap, K extends keyof EventsMap> =
 
 @AccessibleWorker()
 class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
-
+    constructor(msg:string) {
+        super()
+        let a = '随意插入'
+        this.terminalAll()
+        super()
+    }
 
     @GlobalVariable<string>()
-    say!: string
+    say: string = '222'
+
+    @GlobalVariable<any>()
+    postMessage = 'ssss'
 
 
     // 注册事件处理器
@@ -209,7 +220,6 @@ class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
     async onMessage(@MessageData() data: InferParameterType<InputEvents, 'CUSTOMER_TO_SERVER_EVENT'>) {
         this.emit('CUSTOMER_TO_CLIENT_EVENT', '33')
         this.say = data;
-        self.postMessage('ss')
     }
 
 
@@ -270,18 +280,18 @@ export class AccessibleWorkerFactory {
 
 }
 
-const a = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyWorker);
-AccessibleWorkerFactory.registerFunctionSet(funcs)
-const c = AccessibleWorkerFactory.registerFunctionSet({
-    go: async () => console.log('go'),
-    show: (msg: string): void => console.log(msg),
-    add: (a: number, b: number): number => a + b
-})
-c.go().then()
-c.show('HH').then()
-c.add(100, 200).then(r => console.log('====calculate result====', r))
-a.emit<'CUSTOMER_TO_SERVER_EVENT'>('CUSTOMER_TO_SERVER_EVENT', 'Message come from client . . .')
-// on 即注册对应事件处理器
-a.on<'CUSTOMER_TO_CLIENT_EVENT'>('CUSTOMER_TO_CLIENT_EVENT', (res: string) => {
-
-})
+// const a = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyWorker);
+// AccessibleWorkerFactory.registerFunctionSet(funcs)
+// const c = AccessibleWorkerFactory.registerFunctionSet({
+//     go: async () => console.log('go'),
+//     show: (msg: string): void => console.log(msg),
+//     add: (a: number, b: number): number => a + b
+// })
+// c.go().then()
+// c.show('HH').then()
+// c.add(100, 200).then(r => console.log('====calculate result====', r))
+// a.emit<'CUSTOMER_TO_SERVER_EVENT'>('CUSTOMER_TO_SERVER_EVENT', 'Message come from client . . .')
+// // on 即注册对应事件处理器
+// a.on<'CUSTOMER_TO_CLIENT_EVENT'>('CUSTOMER_TO_CLIENT_EVENT', (res: string) => {
+//
+// })
