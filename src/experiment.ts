@@ -199,6 +199,7 @@ type InferParameterType<E extends EventsMap, K extends keyof EventsMap> =
 @AccessibleWorker()
 class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
 
+
     @GlobalVariable<string>()
     say!: string
 

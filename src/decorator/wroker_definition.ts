@@ -70,6 +70,16 @@ export const SubscribeMessage = <E extends EventsMap>(msg: keyof E) => {
             full(parse(funcStr, {ecmaVersion: 2015}), (node: Node,
                                                        state: any,
                                                        type: string) => {
+                // check if 'self' reference used;
+                if (type === 'Identifier') {
+                    const identifierNode = node as IdentifierNode;
+                    if (identifierNode.name === 'self') {
+                        console.log(identifierNode)
+                        console.log(funcStr.substring(identifierNode.start, identifierNode.end))
+                        throw new Error("You should never use 'self' in Accessible Worker method")
+
+                    }
+                }
                 if (type === 'ThisExpression') {
                     const identifierNode = node as IdentifierNode;
                     thisExps.push({start:identifierNode.start,end:identifierNode.end})
