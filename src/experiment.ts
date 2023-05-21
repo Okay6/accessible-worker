@@ -208,8 +208,6 @@ class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
     async onMessage(@MessageData() data: InferParameterType<InputEvents, 'CUSTOMER_TO_SERVER_EVENT'>) {
         this.emit('CUSTOMER_TO_CLIENT_EVENT', '33')
         this.say = data;
-        const self: any = {};
-        self.s = 1;
     }
 
 
