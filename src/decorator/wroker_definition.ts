@@ -139,6 +139,16 @@ export const AccessibleWorker = () => {
                                                            state: any,
                                                            type: string) => {
 
+            // check if 'self' reference used;
+            if (type === 'Identifier') {
+                const identifierNode = node as IdentifierNode;
+                if (identifierNode.name === 'self') {
+                    console.log(identifierNode)
+                    throw new Error("You should never use 'self' in Accessible Worker constructor")
+
+                }
+            }
+
             if (type === 'ThisExpression') {
                 const identifierNode = node as IdentifierNode;
                 _thisExps.push({start: identifierNode.start, end: identifierNode.end})

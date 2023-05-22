@@ -212,7 +212,7 @@ class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
     say: string = '222'
 
     @GlobalVariable<any>()
-    postMessage = 'ssss'
+    postMessage = self.postMessage
 
 
     // 注册事件处理器
