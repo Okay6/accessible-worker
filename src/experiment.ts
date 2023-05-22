@@ -221,6 +221,7 @@ class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
         this.emit('CUSTOMER_TO_CLIENT_EVENT', '33')
         this.say = data;
         const s = await fetch('/ssss')
+        super.terminalAll()
     }
 
 

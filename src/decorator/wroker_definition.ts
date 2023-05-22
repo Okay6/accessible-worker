@@ -91,17 +91,23 @@ export const AccessibleWorker = () => {
         let constructorPosition: { start: number; end: number } = {start: 0, end: 0}
         let superCallPositions: { start: number; end: number } [] = []
         let constructorParams: IdentifierNode[] = []
-        full(parse(classStr, {ecmaVersion: 2015}), (node: Node,
-                                                    state: any,
-                                                    type: string) => {
+        let _node: Node
+        try {
+            _node = parse(classStr, {ecmaVersion: 2015})
+        } catch (e: any) {
+            throw new Error(e.message)
+        }
+        full(_node, (node: Node,
+                     state: any,
+                     type: string) => {
 
                 if (type === 'MethodDefinition') {
                     const constructorDefinition = node as MethodDefinition;
                     if (constructorDefinition.kind === 'constructor') {
                         constructorPosition = {start: constructorDefinition.start, end: constructorDefinition.end}
-                        if(constructorDefinition.value){
-                            if(constructorDefinition.value.params){
-                                constructorParams  =constructorDefinition.value.params
+                        if (constructorDefinition.value) {
+                            if (constructorDefinition.value.params) {
+                                constructorParams = constructorDefinition.value.params
                             }
                         }
                     }
@@ -124,7 +130,7 @@ export const AccessibleWorker = () => {
                 accessibleWorkerClassSplit[i] = ' ';
             }
         }
-        for( const param of constructorParams){
+        for (const param of constructorParams) {
             for (let i = param.start; i < param.end; i++) {
                 accessibleWorkerClassSplit[i] = ' ';
             }
@@ -135,9 +141,15 @@ export const AccessibleWorker = () => {
         // replace this reference to self
         const _thisExps: { start: number; end: number }[] = [];
         const constructorFunc = 'function ' + constructorStr;
-        full(parse(constructorFunc, {ecmaVersion: 2015}), (node: Node,
-                                                           state: any,
-                                                           type: string) => {
+        let node: Node;
+        try {
+            node = parse(constructorFunc, {ecmaVersion: 2015})
+        } catch (e: any) {
+            throw new Error(e.message)
+        }
+        full(node, (node: Node,
+                    state: any,
+                    type: string) => {
 
             // check if 'self' reference used;
             if (type === 'Identifier') {
@@ -191,9 +203,15 @@ export const SubscribeMessage = <E extends EventsMap>(msg: keyof E) => {
 
                 const funcStr = 'function ' + func["value"].toString()
                 const thisExps: { start: number; end: number }[] = [];
-                full(parse(funcStr, {ecmaVersion: 2015}), (node: Node,
-                                                           state: any,
-                                                           type: string) => {
+                let node: Node;
+                try {
+                    node = parse(funcStr, {ecmaVersion: 2015})
+                } catch (e: any) {
+                    throw new Error(e.message)
+                }
+                full(node, (node: Node,
+                            state: any,
+                            type: string) => {
                     // check if 'self' reference used;
                     if (type === 'Identifier') {
                         const identifierNode = node as IdentifierNode;
