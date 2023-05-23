@@ -212,7 +212,7 @@ class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
     say: string = '222'
 
     @GlobalVariable<any>()
-    postMessage = self.postMessage
+    postMessage = ''
 
 
     // 注册事件处理器
@@ -221,7 +221,6 @@ class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
         this.emit('CUSTOMER_TO_CLIENT_EVENT', '33')
         this.say = data;
         const s = await fetch('/ssss')
-        super.terminalAll()
     }
 
 

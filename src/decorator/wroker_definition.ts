@@ -3,6 +3,9 @@ import "reflect-metadata"
 import {Node, parse} from 'acorn'
 import {full} from 'acorn-walk'
 
+/// <reference path = './beautify.min.d.ts' />
+import  * as jsBeautify from './beautify.min.js'
+
 export interface WorkThread {
 
 }
@@ -172,9 +175,10 @@ export const AccessibleWorker = () => {
                 funcSplit[thisExp.start + i] = 'self'[i]
             }
         }
-
-        console.log(funcSplit.join(''))
-
+        const initFunc = funcSplit.join('')
+        let  initWorker = initFunc.replace(/(?<=function\s).+(?=\()/,'init_worker')
+        initWorker = jsBeautify.js_beautify(initWorker,{preserve_newlines:false})
+        console.log(initWorker)
 
     }
 
