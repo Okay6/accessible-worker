@@ -1,4 +1,4 @@
-import {ChannelWorkerDefinition, EventsMap} from "../experiment";
+import {AccessibleWorkerFactory, ChannelWorkerDefinition, EventsMap} from "../experiment";
 import "reflect-metadata"
 import {Node, parse} from 'acorn'
 import {full} from 'acorn-walk'
@@ -178,6 +178,7 @@ export const AccessibleWorker = () => {
         }
         const initFunc = funcSplit.join('')
         let initWorker = initFunc.replace(/(?<=function\s).+(?=\()/, '__aw_init__')
+        initWorker = initWorker.replace(/[^\.\[\]\(\)\{\};,&|]+(?=.AccessibleWorkerModule)\./g,'')
         initWorker = jsBeautify.js_beautify(initWorker)
 
         Reflect.defineMetadata(WORKER_INITIAL_FUNC, initWorker, target)
@@ -250,6 +251,7 @@ export const SubscribeMessage = <E extends EventsMap>(msg: keyof E) => {
                     workerDefinition = {globalFunctions:{},globalVariables:[]}
                 }
                 workerDefinition.globalFunctions[msg.toString()] = funcSplit.join('')
+                    .replace(/[^\.\[\]\(\)\{\};,&|]+(?=.AccessibleWorkerModule)\./g,'')
                 workerDefinition.globalFunctions = {... workerDefinition.globalFunctions}
                 Reflect.defineMetadata(WORKER_DEFINITION, workerDefinition, target)
 
@@ -262,5 +264,9 @@ export const SubscribeMessage = <E extends EventsMap>(msg: keyof E) => {
 
 export const MessageData = () => (target: Type<ChannelWorkerDefinition<EventsMap, EventsMap>>, name: PropertyKey, index: number) => {
 
+
+}
+
+export const AccessibleWorkerFactoryConfig = (config:any)=> (target: Type<AccessibleWorkerFactory>) => {
 
 }

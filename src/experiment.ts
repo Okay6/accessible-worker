@@ -1,5 +1,6 @@
 import {
     AccessibleWorker,
+    AccessibleWorkerFactoryConfig,
     GlobalVariable,
     MessageData,
     SubscribeMessage,
@@ -8,10 +9,16 @@ import {
     WorkerConfig,
     WorkerDefinition,
     WorkThread
-} from "./decorator/wroker_definition";
-import {buildGlobalFunctions, buildGlobalVariables, buildWorkerJs} from "./template/accessible_worker";
+} from "./decorator/worker_definition";
+import {
+    buildFunctionalWorkerJs,
+    buildGlobalFunctions,
+    buildGlobalVariables,
+    buildWorkerJs
+} from "./template/accessible_worker";
 /// <reference path = './decorator/beautify.min.d.ts' />
 import * as jsBeautify from './decorator/beautify.min.js'
+
 /**
  * An events map is an interface that maps event names to their value, which
  * represents the type of the `on` listener.
@@ -75,20 +82,12 @@ export  type  FunctionSet = {
     [key: string | symbol]: Func
 }
 
-let funcs = {
-    add: (a: number, b: number): number => a + b,
-    sub: (a: number, b: number): Promise<number> => Promise.resolve(a - b)
-}
 
 function proxify<T>(o: T): Proxify<T> {
     return o as unknown as Proxify<T>
 }
 
 
-let b = proxify(funcs)
-// b.add(1, 2).then(res => console.log(res))
-// b.sub(1, 2).then(r => r)
-// b.add(2, 7).then(res => console.log(res))
 
 /****************************************************/
 export type  SubscribeCallBack<I> = {
@@ -112,14 +111,34 @@ export interface IChannelWorkerClient<ListenEvents extends EventsMap, EmitEvents
  */
 class FunctionSetWorkerProxyClient<F extends FunctionSet> {
     threadPool = new Map<number, WorkThread>()
-    taskQueue: Array<keyof F> = []
+    private handlerQueue: Record<string, (...args: any) => void | any> = {}
+    private readonly worker!: Worker
 
-    constructor(f: FunctionSet) {
+    getMaxHandlerIndex(): string {
+        const allKeys: number[] = Object.keys(this.handlerQueue).map(it => Number.parseInt(it))
+        if (allKeys.length === 0) {
+            return '0'
+        } else {
+            let sorted = allKeys.sort()
+            return String(sorted[sorted.length - 1] + 1)
+        }
+    }
+
+    constructor(f: FunctionSet, workerSourceCode: string) {
+        const workerBlob = new Blob([workerSourceCode], {type: "text/javascript"});
+        const workerUrl = URL.createObjectURL(workerBlob);
+        this.worker = new Worker(workerUrl)
+        this.worker.onmessage = (e: MessageEvent<{ event: string; args: any, handlerIndex: string }>) => {
+            const handler = this.handlerQueue[e.data.handlerIndex];
+            handler.apply(handler, [e.data.args])
+        }
         for (const k in f) {
-            const e: Function = f[k] as Function;
             (this as unknown as FunctionSet)[k] = (...args) => {
-                const res = e.call(e, ...args)
-                return Promise.resolve(res)
+                const handlerIndex = this.getMaxHandlerIndex()
+                this.worker.postMessage({event: k, args: args, handlerIndex: handlerIndex})
+                return new Promise<any>((resolve: (...args: any) => void | any) => {
+                    this.handlerQueue[handlerIndex] = resolve
+                })
             }
         }
     }
@@ -135,6 +154,20 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
     taskQueue: Array<keyof O> = []
     workerConfig!: WorkerConfig
 
+    private worker!: Worker
+
+    constructor(workerSourceCode: string) {
+        const workerBlob = new Blob([workerSourceCode], {type: "text/javascript"});
+        const workerUrl = URL.createObjectURL(workerBlob);
+        this.worker = new Worker(workerUrl)
+        this.worker.onmessage = (e: MessageEvent<{ event: string, args: any }>) => {
+            const handler =  this.eventHandlerRecord[e.data.event];
+            if(handler){
+                handler.apply(handler, e.data.args)
+            }
+        }
+    }
+
     private eventHandlerRecord: Record<string | symbol, Func> = {}
 
     on<Ev extends UserEventNames<I>>(ev: Ev, listener: UserListener<I, Ev>): void {
@@ -148,6 +181,7 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
         // 3. 如果不存在，查看WorkerConfig 的strategy，如果是PERFORMANCE，则创建新线程并提交任务
         // 如果的strategy为MEMORY_SAVE，则将任务放入taskQueue，等待空闲线程调度
         //
+        this.worker.postMessage({event: ev, args: args})
 
 
     }
@@ -208,7 +242,8 @@ class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEven
 
     @SubscribeMessage<InputEvents>('COMBINE_MESSAGE')
     async combineMessage(@MessageData() data: InferParameterType<InputEvents, 'CUSTOMER_TO_SERVER_EVENT'>) {
-        this.emit('COMBINED_MESSAGE', this.prefix + data)
+        this.emit('COMBINED_MESSAGE', `${this.prefix} ${data}`)
+
     }
 }
 
@@ -222,7 +257,7 @@ class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEven
  */
 
 /*****************************************************************************/
-
+@AccessibleWorkerFactoryConfig({})
 export class AccessibleWorkerFactory {
     /**
      * 根据ChannelWorkerDefinition构造Worker
@@ -236,16 +271,16 @@ export class AccessibleWorkerFactory {
         const workerDefinition: WorkerDefinition = Reflect.getOwnMetadata(WORKER_DEFINITION, _t.prototype)
 
         const initialFunc = Reflect.getOwnMetadata(WORKER_INITIAL_FUNC, _t)
+        let workerSourceCode: string = ''
         if (workerDefinition && initialFunc) {
             const globalVariables: string = buildGlobalVariables(workerDefinition.globalVariables)
             const globalFunctions: string = buildGlobalFunctions(workerDefinition.globalFunctions)
-            let workerSourceCode = buildWorkerJs(initialFunc, globalFunctions, globalVariables)
+            workerSourceCode = buildWorkerJs(initialFunc, globalFunctions, globalVariables)
             workerSourceCode = jsBeautify.js_beautify(workerSourceCode, {preserve_newlines: false})
-            console.log(workerSourceCode)
 
         }
 
-        return new ChannelWorkerClient<O, I>();
+        return new ChannelWorkerClient<O, I>(workerSourceCode);
     }
 
     /**
@@ -253,11 +288,19 @@ export class AccessibleWorkerFactory {
      *
      */
 
-    public static registerFunctionSet<T extends FunctionSet>(funcSet: T): Proxify<T> {
+    public static registerFunctionSet<T extends FunctionSet>(funcSet: T, config?: {}): Proxify<T> {
+        const functionRecord: Record<string, string> = {}
+        for (const key of Object.keys(funcSet)) {
+            const func = funcSet[key].toString().replace(/[^\.\[\]\(\)\{\};,&|]+(?=.AccessibleWorkerModule)\./g, '');
+            functionRecord[key] = func
+        }
+        const globalFunctions = buildGlobalFunctions(functionRecord)
+        let functionalWorkerCode = buildFunctionalWorkerJs(globalFunctions)
+        functionalWorkerCode = jsBeautify.js_beautify(functionalWorkerCode, {preserve_newlines: false})
         /**
          * 该存储到存储结构中，后面使用fetch instance获取指定实例
          */
-        const f = new FunctionSetWorkerProxyClient<T>(funcSet)
+        const f = new FunctionSetWorkerProxyClient<T>(funcSet, functionalWorkerCode)
 
         // return proxify(funcSet)
         return f as Proxify<T>
@@ -274,4 +317,24 @@ export class AccessibleWorkerFactory {
 
 }
 
-AccessibleWorkerFactory.registerChannelWorker(MyAccessibleWorker)
+const funcs = {
+    add: (a: number, b: number): number => {
+        return a + b
+    },
+    sub: (a: number, b: number): Promise<number> => Promise.resolve(a - b)
+}
+
+const workerClient = AccessibleWorkerFactory.registerChannelWorker(MyAccessibleWorker)
+
+const functionWorker = AccessibleWorkerFactory.registerFunctionSet(funcs)
+functionWorker.sub(3, 1).then(res => {
+    console.log(res)
+})
+functionWorker.add(1, 3).then(res => {
+    console.log(res)
+})
+workerClient.on('COMBINED_MESSAGE', (msg: string) => {
+    console.log('====Combined Message====')
+    console.log(msg)
+})
+workerClient.emit('COMBINE_MESSAGE', 'lee')
