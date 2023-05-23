@@ -18,6 +18,7 @@ import {
 } from "./template/accessible_worker";
 /// <reference path = './decorator/beautify.min.d.ts' />
 import * as jsBeautify from './decorator/beautify.min.js'
+import {AccessibleWorkerModule} from "./worker_module";
 
 /**
  * An events map is an interface that maps event names to their value, which
@@ -88,7 +89,6 @@ function proxify<T>(o: T): Proxify<T> {
 }
 
 
-
 /****************************************************/
 export type  SubscribeCallBack<I> = {
     // eslint-disable-next-line functional/no-return-void
@@ -127,7 +127,7 @@ class FunctionSetWorkerProxyClient<F extends FunctionSet> {
     constructor(f: FunctionSet, workerSourceCode: string) {
         const workerBlob = new Blob([workerSourceCode], {type: "text/javascript"});
         const workerUrl = URL.createObjectURL(workerBlob);
-        this.worker = new Worker(workerUrl)
+        this.worker = new Worker(workerUrl, {type:"module"})
         this.worker.onmessage = (e: MessageEvent<{ event: string; args: any, handlerIndex: string }>) => {
             const handler = this.handlerQueue[e.data.handlerIndex];
             handler.apply(handler, [e.data.args])
@@ -159,10 +159,10 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
     constructor(workerSourceCode: string) {
         const workerBlob = new Blob([workerSourceCode], {type: "text/javascript"});
         const workerUrl = URL.createObjectURL(workerBlob);
-        this.worker = new Worker(workerUrl)
+        this.worker = new Worker(workerUrl,{type:"module"})
         this.worker.onmessage = (e: MessageEvent<{ event: string, args: any }>) => {
-            const handler =  this.eventHandlerRecord[e.data.event];
-            if(handler){
+            const handler = this.eventHandlerRecord[e.data.event];
+            if (handler) {
                 handler.apply(handler, e.data.args)
             }
         }
@@ -245,6 +245,7 @@ class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEven
         this.emit('COMBINED_MESSAGE', `${this.prefix} ${data}`)
 
     }
+
 }
 
 /*****************************************************************************/
@@ -291,7 +292,7 @@ export class AccessibleWorkerFactory {
     public static registerFunctionSet<T extends FunctionSet>(funcSet: T, config?: {}): Proxify<T> {
         const functionRecord: Record<string, string> = {}
         for (const key of Object.keys(funcSet)) {
-            const func = funcSet[key].toString().replace(/[^\.\[\]\(\)\{\};,&|]+(?=.AccessibleWorkerModule)\./g, '');
+            const func = funcSet[key].toString().replace(/[^\.\[\]\(\)\{\<\>\=};,&|]+(?=.AccessibleWorkerModule)\./g, '');
             functionRecord[key] = func
         }
         const globalFunctions = buildGlobalFunctions(functionRecord)
@@ -321,7 +322,8 @@ const funcs = {
     add: (a: number, b: number): number => {
         return a + b
     },
-    sub: (a: number, b: number): Promise<number> => Promise.resolve(a - b)
+    sub: (a: number, b: number): Promise<number> => Promise.resolve(a - b),
+    uuid: (): string => AccessibleWorkerModule.uuidv4()
 }
 
 const workerClient = AccessibleWorkerFactory.registerChannelWorker(MyAccessibleWorker)
@@ -332,6 +334,9 @@ functionWorker.sub(3, 1).then(res => {
 })
 functionWorker.add(1, 3).then(res => {
     console.log(res)
+})
+functionWorker.uuid().then(uuid => {
+    console.log(uuid)
 })
 workerClient.on('COMBINED_MESSAGE', (msg: string) => {
     console.log('====Combined Message====')

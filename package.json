@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
+    "build": "npm run build-main && npm run build-module",
+    "build-main":  "webpack --config webpack.config.js",
+    "build-module": "webpack --config webpack.aw.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
