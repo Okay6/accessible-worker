@@ -1,15 +1,17 @@
-import hash from 'hash-it';
 import {
     AccessibleWorker,
     GlobalVariable,
     MessageData,
     SubscribeMessage,
     WORKER_DEFINITION,
+    WORKER_INITIAL_FUNC,
     WorkerConfig,
     WorkerDefinition,
     WorkThread
 } from "./decorator/wroker_definition";
-
+import {buildGlobalFunctions, buildGlobalVariables, buildWorkerJs} from "./template/accessible_worker";
+/// <reference path = './decorator/beautify.min.d.ts' />
+import * as jsBeautify from './decorator/beautify.min.js'
 /**
  * An events map is an interface that maps event names to their value, which
  * represents the type of the `on` listener.
@@ -87,8 +89,7 @@ let b = proxify(funcs)
 // b.add(1, 2).then(res => console.log(res))
 // b.sub(1, 2).then(r => r)
 // b.add(2, 7).then(res => console.log(res))
-console.log(b.add(1, 2))
-console.log(b.sub(1, 2))
+
 /****************************************************/
 export type  SubscribeCallBack<I> = {
     // eslint-disable-next-line functional/no-return-void
@@ -183,47 +184,32 @@ export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap,
 }
 
 
-interface InputEvents {
-    CUSTOMER_TO_SERVER_EVENT: (a: string) => void
-    CUSTOMER_TO_SERVER_EVENT01: (a: string) => void
-}
-
-interface OutputEvents {
-    CUSTOMER_TO_CLIENT_EVENT: (a: string) => void
-}
-
 type InferParameterType<E extends EventsMap, K extends keyof EventsMap> =
     Parameters<E[K]> extends Array<any> ? Parameters<E[K]>[0] : never
 
-/**
- * 解析后，将为
- */
+/****************************************************************************/
+interface InputEvents {
+    COMBINE_MESSAGE: (name: string) => void
+}
+
+interface OutputEvents {
+    COMBINED_MESSAGE: (message: string) => void
+
+}
 
 @AccessibleWorker()
-class MyWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
-    constructor(msg:string) {
-        super()
-        let a = '随意插入'
-        this.terminalAll()
+class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
+    constructor() {
         super()
     }
 
     @GlobalVariable<string>()
-    say: string = '222'
+    prefix: string = 'Hello'
 
-    @GlobalVariable<any>()
-    postMessage = ''
-
-
-    // 注册事件处理器
-    @SubscribeMessage<InputEvents>('CUSTOMER_TO_SERVER_EVENT')
-    async onMessage(@MessageData() data: InferParameterType<InputEvents, 'CUSTOMER_TO_SERVER_EVENT'>) {
-        this.emit('CUSTOMER_TO_CLIENT_EVENT', '33')
-        this.say = data;
-        const s = await fetch('/ssss')
+    @SubscribeMessage<InputEvents>('COMBINE_MESSAGE')
+    async combineMessage(@MessageData() data: InferParameterType<InputEvents, 'CUSTOMER_TO_SERVER_EVENT'>) {
+        this.emit('COMBINED_MESSAGE', this.prefix + data)
     }
-
-
 }
 
 /*****************************************************************************/
@@ -247,10 +233,18 @@ export class AccessibleWorkerFactory {
          * 应该存储到存储结构中，后面使用fetch instance获取指定实例,
          *
          */
-        console.log(hash(_t))
-        const workerDefinition: WorkerDefinition = Reflect.getOwnMetadata(WORKER_DEFINITION, _t) || {ttl: 10 * 3000}
-        console.log('=======WORKER DEFINITION========')
-        console.log(workerDefinition)
+        const workerDefinition: WorkerDefinition = Reflect.getOwnMetadata(WORKER_DEFINITION, _t.prototype)
+
+        const initialFunc = Reflect.getOwnMetadata(WORKER_INITIAL_FUNC, _t)
+        if (workerDefinition && initialFunc) {
+            const globalVariables: string = buildGlobalVariables(workerDefinition.globalVariables)
+            const globalFunctions: string = buildGlobalFunctions(workerDefinition.globalFunctions)
+            let workerSourceCode = buildWorkerJs(initialFunc, globalFunctions, globalVariables)
+            workerSourceCode = jsBeautify.js_beautify(workerSourceCode, {preserve_newlines: false})
+            console.log(workerSourceCode)
+
+        }
+
         return new ChannelWorkerClient<O, I>();
     }
 
@@ -263,7 +257,6 @@ export class AccessibleWorkerFactory {
         /**
          * 该存储到存储结构中，后面使用fetch instance获取指定实例
          */
-        console.log(hash(funcSet))
         const f = new FunctionSetWorkerProxyClient<T>(funcSet)
 
         // return proxify(funcSet)
@@ -281,18 +274,4 @@ export class AccessibleWorkerFactory {
 
 }
 
-// const a = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyWorker);
-// AccessibleWorkerFactory.registerFunctionSet(funcs)
-// const c = AccessibleWorkerFactory.registerFunctionSet({
-//     go: async () => console.log('go'),
-//     show: (msg: string): void => console.log(msg),
-//     add: (a: number, b: number): number => a + b
-// })
-// c.go().then()
-// c.show('HH').then()
-// c.add(100, 200).then(r => console.log('====calculate result====', r))
-// a.emit<'CUSTOMER_TO_SERVER_EVENT'>('CUSTOMER_TO_SERVER_EVENT', 'Message come from client . . .')
-// // on 即注册对应事件处理器
-// a.on<'CUSTOMER_TO_CLIENT_EVENT'>('CUSTOMER_TO_CLIENT_EVENT', (res: string) => {
-//
-// })
+AccessibleWorkerFactory.registerChannelWorker(MyAccessibleWorker)

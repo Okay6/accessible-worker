@@ -4,13 +4,14 @@ import {Node, parse} from 'acorn'
 import {full} from 'acorn-walk'
 
 /// <reference path = './beautify.min.d.ts' />
-import  * as jsBeautify from './beautify.min.js'
+import * as jsBeautify from './beautify.min.js'
 
 export interface WorkThread {
 
 }
 
 export const WORKER_DEFINITION = Symbol('WORKER_DEFINITION')
+export const WORKER_INITIAL_FUNC = Symbol('WORKER_INITIAL_FUNC')
 
 export interface WorkerConfig {
     ttl: number;
@@ -18,8 +19,12 @@ export interface WorkerConfig {
     minActive: number;
 }
 
+/**
+ * Worker Definition， 包含了 Compiled Web Worker 所有信息
+ */
 export interface WorkerDefinition {
-    ttl: number
+    globalFunctions: Record<string, string>;
+    globalVariables: string[]
 }
 
 // regard as specific T constructor
@@ -83,14 +88,12 @@ type ValueMatchedKey<Type, Value> = {
 /*******************************************************/
 export const AccessibleWorker = () => {
     return (target: Type<ChannelWorkerDefinition<EventsMap, EventsMap>>) => {
-        const workerDefinition: WorkerDefinition = Reflect.getOwnMetadata(WORKER_DEFINITION, target) || {ttl: 10 * 3000}
-        workerDefinition.ttl = 10000
-        Reflect.defineMetadata(WORKER_DEFINITION, workerDefinition, target)
+
 
         // 检查 Class 构造器
 
         const classStr = target.prototype.constructor.toString();
-        console.log(classStr)
+
         let constructorPosition: { start: number; end: number } = {start: 0, end: 0}
         let superCallPositions: { start: number; end: number } [] = []
         let constructorParams: IdentifierNode[] = []
@@ -140,7 +143,6 @@ export const AccessibleWorker = () => {
         }
         const cleanedAccessibleWorkerClass = accessibleWorkerClassSplit.join('')
         const constructorStr = cleanedAccessibleWorkerClass.substring(constructorPosition.start, constructorPosition.end);
-        console.log(constructorStr)
         // replace this reference to self
         const _thisExps: { start: number; end: number }[] = [];
         const constructorFunc = 'function ' + constructorStr;
@@ -158,7 +160,6 @@ export const AccessibleWorker = () => {
             if (type === 'Identifier') {
                 const identifierNode = node as IdentifierNode;
                 if (identifierNode.name === 'self') {
-                    console.log(identifierNode)
                     throw new Error("You should never use 'self' in Accessible Worker constructor")
 
                 }
@@ -176,9 +177,10 @@ export const AccessibleWorker = () => {
             }
         }
         const initFunc = funcSplit.join('')
-        let  initWorker = initFunc.replace(/(?<=function\s).+(?=\()/,'init_worker')
-        initWorker = jsBeautify.js_beautify(initWorker,{preserve_newlines:false})
-        console.log(initWorker)
+        let initWorker = initFunc.replace(/(?<=function\s).+(?=\()/, '__aw_init__')
+        initWorker = jsBeautify.js_beautify(initWorker)
+
+        Reflect.defineMetadata(WORKER_INITIAL_FUNC, initWorker, target)
 
     }
 
@@ -189,6 +191,13 @@ export const GlobalVariable = <T>() =>
         target: ChannelWorkerDefinition,
         field: ValueMatchedKey<ChannelWorkerDefinition, T>
     ) => {
+        let workerDefinition: WorkerDefinition = Reflect.getOwnMetadata(WORKER_DEFINITION, target)
+        if(!workerDefinition){
+            workerDefinition = {globalFunctions:{},globalVariables:[]}
+        }
+        workerDefinition.globalVariables.push(field.toString())
+        workerDefinition.globalVariables = [...workerDefinition.globalVariables]
+        Reflect.defineMetadata(WORKER_DEFINITION, workerDefinition, target)
 
     };
 
@@ -201,8 +210,7 @@ export const SubscribeMessage = <E extends EventsMap>(msg: keyof E) => {
         ) => {
             const func = Reflect.getOwnPropertyDescriptor(target, propertyKey) as TypedPropertyDescriptor<(...args: any[]) => any>
 
-            console.log('==========method info==========')
-            console.log(target)
+
             if (func && func.value) {
 
                 const funcStr = 'function ' + func["value"].toString()
@@ -220,8 +228,7 @@ export const SubscribeMessage = <E extends EventsMap>(msg: keyof E) => {
                     if (type === 'Identifier') {
                         const identifierNode = node as IdentifierNode;
                         if (identifierNode.name === 'self') {
-                            console.log(identifierNode)
-                            console.log(funcStr.substring(identifierNode.start, identifierNode.end))
+
                             throw new Error("You should never use 'self' in Accessible Worker method")
 
                         }
@@ -237,18 +244,18 @@ export const SubscribeMessage = <E extends EventsMap>(msg: keyof E) => {
                         funcSplit[thisExp.start + i] = 'self'[i]
                     }
                 }
-                console.log(funcSplit.join(''))
+
+                let workerDefinition: WorkerDefinition = Reflect.getOwnMetadata(WORKER_DEFINITION, target)
+                if(!workerDefinition){
+                    workerDefinition = {globalFunctions:{},globalVariables:[]}
+                }
+                workerDefinition.globalFunctions[msg.toString()] = funcSplit.join('')
+                workerDefinition.globalFunctions = {... workerDefinition.globalFunctions}
+                Reflect.defineMetadata(WORKER_DEFINITION, workerDefinition, target)
 
 
             }
         }
-        /**
-         * 1. 检查self. 引用操作, 发现即报错
-         * 2. this. 引用操作全部替换为self.
-         * 3.
-         *
-         */
-
     }
 ;
 
