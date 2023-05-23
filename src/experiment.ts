@@ -127,7 +127,7 @@ class FunctionSetWorkerProxyClient<F extends FunctionSet> {
     constructor(f: FunctionSet, workerSourceCode: string) {
         const workerBlob = new Blob([workerSourceCode], {type: "text/javascript"});
         const workerUrl = URL.createObjectURL(workerBlob);
-        this.worker = new Worker(workerUrl, {type:"module"})
+        this.worker = new Worker(workerUrl, {type: "module"})
         this.worker.onmessage = (e: MessageEvent<{ event: string; args: any, handlerIndex: string }>) => {
             const handler = this.handlerQueue[e.data.handlerIndex];
             handler.apply(handler, [e.data.args])
@@ -159,7 +159,7 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
     constructor(workerSourceCode: string) {
         const workerBlob = new Blob([workerSourceCode], {type: "text/javascript"});
         const workerUrl = URL.createObjectURL(workerBlob);
-        this.worker = new Worker(workerUrl,{type:"module"})
+        this.worker = new Worker(workerUrl, {type: "module"})
         this.worker.onmessage = (e: MessageEvent<{ event: string, args: any }>) => {
             const handler = this.eventHandlerRecord[e.data.event];
             if (handler) {
@@ -242,6 +242,7 @@ class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEven
 
     @SubscribeMessage<InputEvents>('COMBINE_MESSAGE')
     async combineMessage(@MessageData() data: InferParameterType<InputEvents, 'CUSTOMER_TO_SERVER_EVENT'>) {
+        console.log(AccessibleWorkerModule.a + AccessibleWorkerModule.b)
         this.emit('COMBINED_MESSAGE', `${this.prefix} ${data}`)
 
     }
@@ -264,7 +265,7 @@ export class AccessibleWorkerFactory {
      * 根据ChannelWorkerDefinition构造Worker
      * @param _t
      */
-    public static registerChannelWorker<I extends EventsMap, O extends EventsMap>(_t: new () => ChannelWorkerDefinition<I, O>): IChannelWorkerClient<O, I> {
+    public static registerChannelWorker<I extends EventsMap, O extends EventsMap>(_t: new () => ChannelWorkerDefinition<I, O>): Promise<IChannelWorkerClient<O, I>> {
         /**
          * 应该存储到存储结构中，后面使用fetch instance获取指定实例,
          *
@@ -280,8 +281,22 @@ export class AccessibleWorkerFactory {
             workerSourceCode = jsBeautify.js_beautify(workerSourceCode, {preserve_newlines: false})
 
         }
+        let resolveFunc: (arg: IChannelWorkerClient<O, I>) => void;
 
-        return new ChannelWorkerClient<O, I>(workerSourceCode);
+        fetch('/src/worker/accessible_worker_module.js').then(moduleSource => {
+            moduleSource.text().then(source => {
+                const accessibleModule = source + '\n' + 'var AccessibleWorkerModule = __webpack_exports__.AccessibleWorkerModule' + '\n'
+                const client = new ChannelWorkerClient<O, I>(accessibleModule + workerSourceCode);
+                resolveFunc(client)
+            })
+        })
+
+        // return proxify(funcSet)
+        return new Promise<IChannelWorkerClient<O, I>>((resolve => {
+            resolveFunc = resolve
+        }))
+
+
     }
 
     /**
@@ -289,22 +304,31 @@ export class AccessibleWorkerFactory {
      *
      */
 
-    public static registerFunctionSet<T extends FunctionSet>(funcSet: T, config?: {}): Proxify<T> {
+    public static registerFunctionSet<T extends FunctionSet>(funcSet: T, config?: {}): Promise<Proxify<T>> {
         const functionRecord: Record<string, string> = {}
         for (const key of Object.keys(funcSet)) {
-            const func = funcSet[key].toString().replace(/[^\.\[\]\(\)\{\<\>\=};,&|]+(?=.AccessibleWorkerModule)\./g, '');
+            const func = funcSet[key].toString().replace(/[\d\w]+(?=.AccessibleWorkerModule)\./g, '');
             functionRecord[key] = func
         }
         const globalFunctions = buildGlobalFunctions(functionRecord)
         let functionalWorkerCode = buildFunctionalWorkerJs(globalFunctions)
         functionalWorkerCode = jsBeautify.js_beautify(functionalWorkerCode, {preserve_newlines: false})
+        let resolveFunc: (arg: Proxify<T>) => void;
         /**
          * 该存储到存储结构中，后面使用fetch instance获取指定实例
          */
-        const f = new FunctionSetWorkerProxyClient<T>(funcSet, functionalWorkerCode)
+        fetch('/src/worker/accessible_worker_module.js').then(moduleSource => {
+            moduleSource.text().then(source => {
+                const accessibleModule = source + '\n' + 'var AccessibleWorkerModule = __webpack_exports__.AccessibleWorkerModule' + '\n'
+                const f = new FunctionSetWorkerProxyClient<T>(funcSet, accessibleModule + functionalWorkerCode)
+                resolveFunc(f as Proxify<T>)
+            })
+        })
 
         // return proxify(funcSet)
-        return f as Proxify<T>
+        return new Promise<Proxify<T>>((resolve => {
+            resolveFunc = resolve
+        }))
     }
 
     public static getChannelWorkerClient<I extends EventsMap, O extends EventsMap>(_t: new () => ChannelWorkerDefinition<I, O>):
@@ -323,23 +347,32 @@ const funcs = {
         return a + b
     },
     sub: (a: number, b: number): Promise<number> => Promise.resolve(a - b),
-    uuid: (): string => AccessibleWorkerModule.uuidv4()
+    uuid: (): string => AccessibleWorkerModule.uuidv4(),
+    combine:(msg:string) => AccessibleWorkerModule.uuidv4() + ' ' + msg
 }
 
 const workerClient = AccessibleWorkerFactory.registerChannelWorker(MyAccessibleWorker)
 
 const functionWorker = AccessibleWorkerFactory.registerFunctionSet(funcs)
-functionWorker.sub(3, 1).then(res => {
-    console.log(res)
+functionWorker.then(f => {
+    f.sub(3, 1).then(res => {
+        console.log(res)
+    })
+    f.add(1, 3).then(res => {
+        console.log(res)
+    })
+    f.uuid().then(uuid => {
+        console.log(uuid)
+    })
+    f.combine('lee').then(res=>{
+        console.log(res)
+    })
 })
-functionWorker.add(1, 3).then(res => {
-    console.log(res)
+workerClient.then(client => {
+    client.on('COMBINED_MESSAGE', (msg: string) => {
+        console.log('====Combined Message====')
+        console.log(msg)
+    })
+    client.emit('COMBINE_MESSAGE', 'lee')
+
 })
-functionWorker.uuid().then(uuid => {
-    console.log(uuid)
-})
-workerClient.on('COMBINED_MESSAGE', (msg: string) => {
-    console.log('====Combined Message====')
-    console.log(msg)
-})
-workerClient.emit('COMBINE_MESSAGE', 'lee')

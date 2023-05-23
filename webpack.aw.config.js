@@ -11,7 +11,7 @@ module.exports = {
         filename: "[name].js",
         path: path.resolve(__dirname, "src/worker"),
         library: {
-            type: "amd"
+            type: "module"
         }
     },
     resolve: {

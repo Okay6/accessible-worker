@@ -1,5 +1,3 @@
-import {REQUIRE_JS} from "./requirejs";
-
 /**
  * 将Accessible Worker Class 编译为对应worker.js 的预编译模板
  */
@@ -42,7 +40,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 `
 
 export const buildWorkerJs = (initialFunc: string, globalFunctions: string, globalVariables: string) =>
-    REQUIRE_JS +
     TYPESCRIPT_ASYNC_HELPER +
     `
   /* +++++++++++++++++++++++++++++++++++ */
@@ -74,7 +71,6 @@ export const buildWorkerJs = (initialFunc: string, globalFunctions: string, glob
 `
 
 export const buildFunctionalWorkerJs = (globalFunctions: string) =>
-    REQUIRE_JS +
     TYPESCRIPT_ASYNC_HELPER +
     `
   /* +++++++++++++++++++++++++++++++++++ */
