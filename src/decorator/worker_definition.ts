@@ -266,7 +266,3 @@ export const MessageData = () => (target: Type<ChannelWorkerDefinition<EventsMap
 
 
 }
-
-export const AccessibleWorkerFactoryConfig = (config:any)=> (target: Type<AccessibleWorkerFactory>) => {
-
-}

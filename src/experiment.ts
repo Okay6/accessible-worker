@@ -1,6 +1,5 @@
 import {
     AccessibleWorker,
-    AccessibleWorkerFactoryConfig,
     GlobalVariable,
     MessageData,
     SubscribeMessage,
@@ -259,7 +258,6 @@ class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEven
  */
 
 /*****************************************************************************/
-@AccessibleWorkerFactoryConfig({})
 export class AccessibleWorkerFactory {
     /**
      * 根据ChannelWorkerDefinition构造Worker
@@ -283,7 +281,7 @@ export class AccessibleWorkerFactory {
         }
         let resolveFunc: (arg: IChannelWorkerClient<O, I>) => void;
 
-        fetch('/src/worker/accessible_worker_module.js').then(moduleSource => {
+        fetch('/accessible_worker_module.js').then(moduleSource => {
             moduleSource.text().then(source => {
                 const accessibleModule = source + '\n' + 'var AccessibleWorkerModule = __webpack_exports__.AccessibleWorkerModule' + '\n'
                 const client = new ChannelWorkerClient<O, I>(accessibleModule + workerSourceCode);
@@ -317,7 +315,7 @@ export class AccessibleWorkerFactory {
         /**
          * 该存储到存储结构中，后面使用fetch instance获取指定实例
          */
-        fetch('/src/worker/accessible_worker_module.js').then(moduleSource => {
+        fetch('/accessible_worker_module.js').then(moduleSource => {
             moduleSource.text().then(source => {
                 const accessibleModule = source + '\n' + 'var AccessibleWorkerModule = __webpack_exports__.AccessibleWorkerModule' + '\n'
                 const f = new FunctionSetWorkerProxyClient<T>(funcSet, accessibleModule + functionalWorkerCode)
@@ -348,7 +346,7 @@ const funcs = {
     },
     sub: (a: number, b: number): Promise<number> => Promise.resolve(a - b),
     uuid: (): string => AccessibleWorkerModule.uuidv4(),
-    combine:(msg:string) => AccessibleWorkerModule.uuidv4() + ' ' + msg
+    combine: (msg: string) => AccessibleWorkerModule.uuidv4() + ' ' + msg
 }
 
 const workerClient = AccessibleWorkerFactory.registerChannelWorker(MyAccessibleWorker)
@@ -364,7 +362,7 @@ functionWorker.then(f => {
     f.uuid().then(uuid => {
         console.log(uuid)
     })
-    f.combine('lee').then(res=>{
+    f.combine('lee').then(res => {
         console.log(res)
     })
 })
