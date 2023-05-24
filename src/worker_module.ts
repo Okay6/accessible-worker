@@ -1,8 +1,12 @@
 import {v4 as uuidv4} from "uuid";
 
-class MyOwnClass {
-    say(s: string) {
-        console.log('say', s)
+class CalculateClass {
+    factorial(num: number) :number{
+        if(num > 1){
+            return  this.factorial(num-1) * num
+        }else{
+            return  num
+        }
     }
 }
 
@@ -11,7 +15,7 @@ export const AccessibleWorkerModule = {
     var: 'variable',
     a: '1',
     b: '2',
-    MyOwnClass: MyOwnClass
+    CalculateClass: CalculateClass
 }
 
 

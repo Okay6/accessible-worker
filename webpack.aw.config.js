@@ -1,4 +1,4 @@
-const path = require("path");
+const path = require('path');
 
 module.exports = {
     entry: {
@@ -9,7 +9,7 @@ module.exports = {
     },
     output: {
         filename: "[name].js",
-        path: path.resolve(__dirname, "src/worker"),
+        path: path.resolve(__dirname, "dist"),
         library: {
             type: "module"
         }

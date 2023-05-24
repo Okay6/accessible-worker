@@ -54,7 +54,7 @@ export const buildWorkerJs = (initialFunc: string, globalFunctions: string, glob
   
   /** Message Subscribe **/
   self.onmessage = (msg) => {
-    self[msg.data.event].apply(self, msg.data.args)
+    self[msg.data.event].apply(self, [msg.data.args])
   }
   /** Message Emit **/
   self.emit = function(event, ...args) {

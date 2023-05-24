@@ -19,21 +19,15 @@ import {
 import * as jsBeautify from './decorator/beautify.min.js'
 import {AccessibleWorkerModule} from "./worker_module";
 
+
 /**
  * An events map is an interface that maps event names to their value, which
  * represents the type of the `on` listener.
  */
 export interface EventsMap {
-    [key: string]: any
+    [key: string]: (arg: any) => void
 }
 
-/**
- * The default events map, used if no EventsMap is given. Using this EventsMap
- * is equivalent to accepting all event names, and any data.
- */
-export interface DefaultEventsMap {
-    [key: string]: Func
-}
 
 /**
  * Returns a union type containing all the keys of an event map.
@@ -43,7 +37,7 @@ export type EventNames<Map extends EventsMap> = keyof Map & (string | symbol);
 
 /** The tuple type representing the parameters of an event listener */
 export type EventParams<Map extends EventsMap,
-    Ev extends EventNames<Map>> = Parameters<Map[Ev]>
+    Ev extends EventNames<Map>> = Parameters<Map[Ev]> extends never ? never : Parameters<Map[Ev]>[0]
 
 
 /**
@@ -56,7 +50,7 @@ export type UserEventNames<UserEvents extends EventsMap> = EventNames<UserEvents
  * `ReservedEvents`, the reserved event listener is returned.
  */
 export type UserListener<UserEvents extends EventsMap,
-    Ev extends keyof UserEvents> = UserEvents[Ev]
+    Ev extends keyof UserEvents> = (arg: Parameters<UserEvents[Ev]> extends never ? never : Parameters<UserEvents[Ev]>[0]) => void
 
 
 /****************************************************/
@@ -83,25 +77,12 @@ export  type  FunctionSet = {
 }
 
 
-function proxify<T>(o: T): Proxify<T> {
-    return o as unknown as Proxify<T>
-}
-
-
-/****************************************************/
-export type  SubscribeCallBack<I> = {
-    // eslint-disable-next-line functional/no-return-void
-    readonly onData: (data: I) => void;
-    // eslint-disable-next-line functional/no-return-void
-    readonly onError: (error: never) => void;
-}
-
 export interface IChannelWorkerClient<ListenEvents extends EventsMap, EmitEvents extends EventsMap> {
     on<Ev extends UserEventNames<ListenEvents>>(ev: Ev, listener: UserListener<ListenEvents, Ev>): void;
 
     // Parameters 在 Web Storm 中 报错 Rest parameter must be an array type or a generic with array constraint，但编译通过，暂时忽略
     //noinspection all
-    emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...args: EventParams<EmitEvents, Ev>): void;
+    emit<Ev extends EventNames<EmitEvents>>(ev: Ev, arg: EventParams<EmitEvents, Ev>): void;
 
 }
 
@@ -175,13 +156,13 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
     }
 
     //noinspection all
-    emit<Ev extends EventNames<O>>(ev: Ev, ...args: EventParams<O, Ev>): void {
+    emit<Ev extends EventNames<O>>(ev: Ev, arg: EventParams<O, Ev>): void {
         // 1. 查看threadPool 是否存在空闲线程
         // 2. 如果存在，直接使用空闲线程
         // 3. 如果不存在，查看WorkerConfig 的strategy，如果是PERFORMANCE，则创建新线程并提交任务
         // 如果的strategy为MEMORY_SAVE，则将任务放入taskQueue，等待空闲线程调度
         //
-        this.worker.postMessage({event: ev, args: args})
+        this.worker.postMessage({event: ev, args: arg})
 
 
     }
@@ -198,11 +179,7 @@ export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap,
     }
 
     //noinspection all
-    emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...args: EventParams<EmitEvents, Ev>): void {
-
-    }
-
-    terminalAll() {
+    emit<Ev extends EventNames<EmitEvents>>(ev: Ev, arg: EventParams<EmitEvents, Ev>): void {
 
     }
 
@@ -222,32 +199,7 @@ type InferParameterType<E extends EventsMap, K extends keyof EventsMap> =
     Parameters<E[K]> extends Array<any> ? Parameters<E[K]>[0] : never
 
 /****************************************************************************/
-interface InputEvents {
-    COMBINE_MESSAGE: (name: string) => void
-}
 
-interface OutputEvents {
-    COMBINED_MESSAGE: (message: string) => void
-
-}
-
-@AccessibleWorker()
-class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
-    constructor() {
-        super()
-    }
-
-    @GlobalVariable<string>()
-    prefix: string = 'Hello'
-
-    @SubscribeMessage<InputEvents>('COMBINE_MESSAGE')
-    async combineMessage(@MessageData() data: InferParameterType<InputEvents, 'CUSTOMER_TO_SERVER_EVENT'>) {
-        console.log(AccessibleWorkerModule.a + AccessibleWorkerModule.b)
-        this.emit('COMBINED_MESSAGE', `${this.prefix} ${data}`)
-
-    }
-
-}
 
 /*****************************************************************************/
 /**
@@ -340,19 +292,72 @@ export class AccessibleWorkerFactory {
 
 }
 
-const funcs = {
+/******************************* Accessible Worker Demo **************************************/
+// Define I/O events
+interface InputEvents extends EventsMap {
+    COMBINE_MESSAGE: (name: string) => void
+    DOUBLE_NUMBER: (a: number) => void
+    RESERVE_STRING: (data: { str: string }) => void
+}
+
+interface OutputEvents extends EventsMap {
+    COMBINED_MESSAGE: (message: string) => void
+    DOUBLED_NUMBER: (res: number) => void
+    RESERVED_STRING: (res: { str: string }) => void
+}
+
+// Define Accessible Worker Description Class
+@AccessibleWorker()
+class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
+    constructor() {
+        super()
+        this.prefix = 'Hi'
+    }
+
+    @GlobalVariable<string>()
+    prefix: string = 'Hello'
+
+    @SubscribeMessage<InputEvents>('COMBINE_MESSAGE')
+    async combineMessage(@MessageData() data: InferParameterType<InputEvents, 'COMBINE_MESSAGE'>) {
+        console.log(AccessibleWorkerModule.a + AccessibleWorkerModule.b)
+        this.emit('COMBINED_MESSAGE', `${this.prefix} ${data}`)
+
+    }
+
+    @SubscribeMessage<InputEvents>('DOUBLE_NUMBER')
+    async addNumber(@MessageData() data: InferParameterType<InputEvents, 'DOUBLE_NUMBER'>) {
+        this.emit('DOUBLED_NUMBER', data * 2)
+    }
+
+    @SubscribeMessage<InputEvents>('RESERVE_STRING')
+    async reserveString(@MessageData() data: InferParameterType<InputEvents, 'RESERVE_STRING'>) {
+        const array = []
+        for (let i = 0; i < data.str.length; i++) {
+            array.push(data.str.at(i))
+        }
+        this.emit('RESERVED_STRING', {str: array.reverse().join('')})
+
+    }
+
+}
+
+// Define function  set
+const functionSet = {
     add: (a: number, b: number): number => {
         return a + b
     },
     sub: (a: number, b: number): Promise<number> => Promise.resolve(a - b),
     uuid: (): string => AccessibleWorkerModule.uuidv4(),
-    combine: (msg: string) => AccessibleWorkerModule.uuidv4() + ' ' + msg
+    combine: (msg: string) => AccessibleWorkerModule.uuidv4() + ' ' + msg,
+    factorial: (num: number): number => new AccessibleWorkerModule.CalculateClass().factorial(num)
 }
+// register Channel Worker
+const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyAccessibleWorker)
+// register Functional Worker
+const functionalWorkerClient = AccessibleWorkerFactory.registerFunctionSet(functionSet)
 
-const workerClient = AccessibleWorkerFactory.registerChannelWorker(MyAccessibleWorker)
-
-const functionWorker = AccessibleWorkerFactory.registerFunctionSet(funcs)
-functionWorker.then(f => {
+// Use Functional Client
+functionalWorkerClient.then(f => {
     f.sub(3, 1).then(res => {
         console.log(res)
     })
@@ -365,13 +370,28 @@ functionWorker.then(f => {
     f.combine('lee').then(res => {
         console.log(res)
     })
+    f.factorial(5).then(res=>{
+        console.log('=======Factorial Calculate========')
+        console.log(res)
+    })
 })
-workerClient.then(client => {
+// Use Channel Client
+channelWorkerClient.then(client => {
     client.on('COMBINED_MESSAGE', (msg: string) => {
         console.log('====Combined Message====')
         console.log(msg)
     })
+    client.on('DOUBLED_NUMBER', (res: number) => {
+        console.log('========DOUBLE_NUMBER========')
+        console.log(res)
+    })
+    client.on('RESERVED_STRING', res => {
+        console.log('======RESERVED STRING======')
+        console.log(res.str)
+    })
     client.emit('COMBINE_MESSAGE', 'lee')
-    client.emit('COMBINE_MESSAGE','okay6')
+    client.emit('COMBINE_MESSAGE', 'okay6')
+    client.emit('DOUBLE_NUMBER', 4)
+    client.emit('RESERVE_STRING', {str: 'okay6'})
 
 })
