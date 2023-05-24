@@ -1,4 +1,4 @@
-import {AccessibleWorkerFactory, ChannelWorkerDefinition, EventsMap} from "../experiment";
+import {ChannelWorkerDefinition, EventsMap} from "../experiment";
 import "reflect-metadata"
 import {Node, parse} from 'acorn'
 import {full} from 'acorn-walk'

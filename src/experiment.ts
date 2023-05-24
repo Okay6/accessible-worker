@@ -357,7 +357,7 @@ const functionSet = {
     },
     sub: (a: number, b: number): Promise<number> => Promise.resolve(a - b),
     uuid: (): string => new Date().getTime().toString(),
-    combine: (msg: string) => new Date().getTime().toString()+ ' ' + msg,
+    combine: (msg: string) => new Date().getTime().toString() + ' ' + msg,
     factorial: (num: number): number => new AccessibleWorkerModule.CalculateClass().factorial(num)
 }
 // register Channel Worker

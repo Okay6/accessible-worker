@@ -1,5 +1,3 @@
-
-
 class CalculateClass {
     factorial(num: number): number {
         if (num > 1) {
