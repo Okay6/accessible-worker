@@ -130,6 +130,7 @@ class FunctionSetWorkerProxyClient<F extends FunctionSet> {
         this.worker.onmessage = (e: MessageEvent<{ event: string; args: any, handlerIndex: string }>) => {
             const handler = this.handlerQueue[e.data.handlerIndex];
             handler.apply(handler, [e.data.args])
+            delete this.handlerQueue[e.data.handlerIndex]
         }
         for (const k in f) {
             (this as unknown as FunctionSet)[k] = (...args) => {
@@ -305,8 +306,7 @@ export class AccessibleWorkerFactory {
     public static registerFunctionSet<T extends FunctionSet>(funcSet: T, config?: {}): Promise<Proxify<T>> {
         const functionRecord: Record<string, string> = {}
         for (const key of Object.keys(funcSet)) {
-            const func = funcSet[key].toString().replace(/[\d\w]+(?=.AccessibleWorkerModule)\./g, '');
-            functionRecord[key] = func
+            functionRecord[key] = funcSet[key].toString().replace(/[\d\w]+(?=.AccessibleWorkerModule)\./g, '')
         }
         const globalFunctions = buildGlobalFunctions(functionRecord)
         let functionalWorkerCode = buildFunctionalWorkerJs(globalFunctions)
@@ -372,5 +372,6 @@ workerClient.then(client => {
         console.log(msg)
     })
     client.emit('COMBINE_MESSAGE', 'lee')
+    client.emit('COMBINE_MESSAGE','okay6')
 
 })
