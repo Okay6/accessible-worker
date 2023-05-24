@@ -19,7 +19,6 @@ import {
 import * as jsBeautify from './decorator/beautify.min.js'
 import {AccessibleWorkerModule} from "./worker_module";
 
-
 /**
  * An events map is an interface that maps event names to their value, which
  * represents the type of the `on` listener.
@@ -236,7 +235,12 @@ export class AccessibleWorkerFactory {
 
         fetch('/accessible_worker_module.js').then(moduleSource => {
             moduleSource.text().then(source => {
-                const accessibleModule = source + '\n' + 'var AccessibleWorkerModule = __webpack_exports__.AccessibleWorkerModule' + '\n'
+                let replaceName: string = 'None';
+                const exportName = source.match(/(?<=export\s{0,}\{\s{0,})[\w_]+(?=\s{0,}as\s{0,}AccessibleWorkerModule\s{0,}\})/g);
+                if (exportName && exportName.length > 0) {
+                    replaceName = exportName[0]
+                }
+                const accessibleModule = source + '\n' + `var AccessibleWorkerModule = ${replaceName}` + '\n'
                 const client = new ChannelWorkerClient<O, I>(accessibleModule + workerSourceCode);
                 resolveFunc(client)
             })
@@ -269,7 +273,12 @@ export class AccessibleWorkerFactory {
          */
         fetch('/accessible_worker_module.js').then(moduleSource => {
             moduleSource.text().then(source => {
-                const accessibleModule = source + '\n' + 'var AccessibleWorkerModule = __webpack_exports__.AccessibleWorkerModule' + '\n'
+                let replaceName: string = 'None';
+                const exportName = source.match(/(?<=export\s{0,}\{\s{0,})[\w_]+(?=\s{0,}as\s{0,}AccessibleWorkerModule\s{0,}\})/g);
+                if (exportName && exportName.length > 0) {
+                    replaceName = exportName[0]
+                }
+                const accessibleModule = source + '\n' + `var AccessibleWorkerModule = ${replaceName}` + '\n'
                 const f = new FunctionSetWorkerProxyClient<T>(funcSet, accessibleModule + functionalWorkerCode)
                 resolveFunc(f as Proxify<T>)
             })
@@ -347,8 +356,8 @@ const functionSet = {
         return a + b
     },
     sub: (a: number, b: number): Promise<number> => Promise.resolve(a - b),
-    uuid: (): string => AccessibleWorkerModule.uuidv4(),
-    combine: (msg: string) => AccessibleWorkerModule.uuidv4() + ' ' + msg,
+    uuid: (): string => new Date().getTime().toString(),
+    combine: (msg: string) => new Date().getTime().toString()+ ' ' + msg,
     factorial: (num: number): number => new AccessibleWorkerModule.CalculateClass().factorial(num)
 }
 // register Channel Worker
@@ -370,7 +379,7 @@ functionalWorkerClient.then(f => {
     f.combine('lee').then(res => {
         console.log(res)
     })
-    f.factorial(5).then(res=>{
+    f.factorial(5).then(res => {
         console.log('=======Factorial Calculate========')
         console.log(res)
     })

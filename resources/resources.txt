@@ -6,5 +6,5 @@ https://zhuanlan.zhihu.com/p/417301247
 Abstract Summary Tree 抽相语法树可视化工具
 https://astexplorer.net/
 
-Require.js
-https://github.com/requirejs/requirejs/blob/master/tests/workers.js
+Webpack 配置集合
+https://stackoverflow.com/questions/35903246/how-to-create-multiple-output-paths-in-webpack-config

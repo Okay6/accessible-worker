@@ -26,6 +26,6 @@
         "noEmit": false,
         "jsx": "react-jsx"
     },
-    "include": ["src/**/*.ts"],
+    "include": ["src/**/*", "typings/**/*.ts"],
     "exclude": ["node_modules/**"],
 }
