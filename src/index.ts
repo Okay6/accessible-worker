@@ -3,6 +3,7 @@ import {AccessibleWorkerModule} from "./worker_module";
 import * as AWT from "./accessible_worker_type_infer";
 import {AccessibleWorkerFactory, ChannelWorkerDefinition} from "./experiment";
 
+
 /******************************* Accessible Worker Demo **************************************/
 // Define I/O events
 type InputEvents = {
@@ -21,7 +22,7 @@ type OutputEvents = {
 
 // Define Accessible Worker Description Class
 @AccessibleWorker({
-    modules: {AccessibleWorkerModule: 'accessible_worker_module'}
+    module:{name:'AccessibleWorkerModule', relativePath:'accessible_worker_module'}
 })
 class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
     constructor() {
@@ -94,9 +95,9 @@ const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputE
 // register Functional Worker
 const functionalWorkerClient = AccessibleWorkerFactory
     .registerFunctionSet(functionSet,
-        {modules:
-                {AccessibleWorkerModule: 'accessible_worker_module'}
-})
+        {
+            module:{name:'AccessibleWorkerModule', relativePath:'accessible_worker_module'}
+        })
 
 // Use Functional Client
 functionalWorkerClient.then(f => {

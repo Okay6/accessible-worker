@@ -12,7 +12,7 @@ export interface WorkThread {
 }
 
 export interface WorkerRegisterParams {
-    modules?: { [module: string]: string }
+    module?: {name:string,relativePath:string}
 }
 
 export const WORKER_DEFINITION = Symbol('WORKER_DEFINITION')

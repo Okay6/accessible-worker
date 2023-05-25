@@ -156,30 +156,24 @@ export class AccessibleWorkerFactory {
             resolveFunc = resolve
         }))
 
-        if (workerRegisterParams && workerRegisterParams.modules) {
-            const allModules: string[] = []
-            const modules = Object.keys(workerRegisterParams.modules);
-            for (let i = 0; i < modules.length; i++) {
-                const path = workerRegisterParams.modules[modules[i]]
-                fetch(`/${path}.js`).then(moduleSource => {
-                    moduleSource.text().then(source => {
-                        let replaceName: string = 'None';
-                        const r = new RegExp(`(?<=export\\s{0,}\\{\\s{0,})[\\w_]+(?=\\s{0,}as\\s{0,}${modules[i]}\\s{0,}\\})`,'g')
-                        const exportName = source.match(r);
-                        if (exportName && exportName.length > 0) {
-                            replaceName = exportName[0]
-                        }
-                        const accessibleModule = source + '\n' + `var ${modules[i]} = ${replaceName}`
-                        allModules.push(accessibleModule)
-                        if (i === modules.length - 1) {
-                            const modules = allModules.join('\n') +'\n'
-                            const client = new ChannelWorkerClient<O, I>(modules + workerSourceCode);
-                            resolveFunc(client)
-                        }
-                    })
-                })
+        if (workerRegisterParams && workerRegisterParams.module) {
+            fetch(`/${workerRegisterParams.module.relativePath}.js`).then(moduleSource => {
+                moduleSource.text().then(source => {
+                    let replaceName: string = 'None';
+                    const r = new RegExp(`(?<=export\\s{0,}\\{\\s{0,})[\\w_]+(?=\\s{0,}as\\s{0,}${workerRegisterParams.module?.name}\\s{0,}\\})`, 'g')
+                    const exportName = source.match(r);
+                    if (exportName && exportName.length > 0) {
+                        replaceName = exportName[0]
+                    }
+                    const accessibleModule = source + '\n' + `var ${workerRegisterParams.module?.name} = ${replaceName}`
 
-            }
+
+                    const client = new ChannelWorkerClient<O, I>(accessibleModule +'\n'+ workerSourceCode);
+
+                    resolveFunc(client)
+
+                })
+            })
             return p
         } else {
             const client = new ChannelWorkerClient<O, I>(workerSourceCode);
@@ -201,7 +195,8 @@ export class AccessibleWorkerFactory {
         const globalFunctions = buildGlobalFunctions(functionRecord)
         let functionalWorkerCode = buildFunctionalWorkerJs(globalFunctions)
         functionalWorkerCode = jsBeautify.js_beautify(functionalWorkerCode, {preserve_newlines: false})
-        let resolveFunc: (arg: Proxify<T>) => void = ()=>{};
+        let resolveFunc: (arg: Proxify<T>) => void = () => {
+        };
         /**
          * 该存储到存储结构中，后面使用fetch instance获取指定实例
          */
@@ -209,33 +204,26 @@ export class AccessibleWorkerFactory {
             resolveFunc = resolve
         }))
 
-        if (workerRegisterParams && workerRegisterParams.modules) {
-            const allModules: string[] = []
-            const modules = Object.keys(workerRegisterParams.modules);
-            for (let i = 0; i < modules.length; i++) {
-                const path = workerRegisterParams.modules[modules[i]]
-                fetch(`/${path}.js`).then(moduleSource => {
-                    moduleSource.text().then(source => {
-                        let replaceName: string = 'None';
-                        const r = new RegExp(`(?<=export\\s{0,}\\{\\s{0,})[\\w_]+(?=\\s{0,}as\\s{0,}${modules[i]}\\s{0,}\\})`,'g')
-                        const exportName = source.match(r);
-                        if (exportName && exportName.length > 0) {
-                            replaceName = exportName[0]
-                        }
-                        const accessibleModule = source + '\n' + `var ${modules[i]} = ${replaceName}`
-                        allModules.push(accessibleModule)
-                        if (i === modules.length - 1) {
-                            const modules = allModules.join('\n') +'\n'
-                            const f = new FunctionSetWorkerProxyClient<T>(funcSet,modules +functionalWorkerCode)
-                            resolveFunc(f as Proxify<T>)
-                        }
-                    })
-                })
+        if (workerRegisterParams && workerRegisterParams.module) {
+            fetch(`/${workerRegisterParams.module.relativePath}.js`).then(moduleSource => {
+                moduleSource.text().then(source => {
+                    let replaceName: string = 'None';
+                    const r = new RegExp(`(?<=export\\s{0,}\\{\\s{0,})[\\w_]+(?=\\s{0,}as\\s{0,}${workerRegisterParams.module?.name}\\s{0,}\\})`, 'g')
+                    const exportName = source.match(r);
+                    if (exportName && exportName.length > 0) {
+                        replaceName = exportName[0]
+                    }
+                    const accessibleModule = source + '\n' + `var ${workerRegisterParams.module?.name} = ${replaceName}`
 
-            }
+                    const f = new FunctionSetWorkerProxyClient<T>(funcSet, accessibleModule +'\n'+ functionalWorkerCode)
+                    resolveFunc(f as Proxify<T>)
+
+                })
+            })
+
             return p
         } else {
-            const f = new FunctionSetWorkerProxyClient<T>(funcSet,  functionalWorkerCode)
+            const f = new FunctionSetWorkerProxyClient<T>(funcSet, functionalWorkerCode)
 
             return Promise.resolve<Proxify<T>>(f as Proxify<T>)
         }

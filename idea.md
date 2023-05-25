@@ -190,7 +190,11 @@ class Person {
 - 尽量使用Functional Worker
 - 应该保持强类型约束并传递必要的类型参数来帮助编译器进行类型推导
 - 如果使用了第三方模块，必须要使用独立文件导入并打包为 es module 供 worker 引用
-- 
+
+## WorkerRegisterParams
+
+- 提供第三方模块注册信息
+- 提供线程管理参数
 
 
 
