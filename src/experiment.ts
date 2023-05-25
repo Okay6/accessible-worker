@@ -344,6 +344,11 @@ class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEven
         for (let i = 0; i < data.str.length; i++) {
             array.push(data.str.at(i))
         }
+        const domain = location.protocol + '//' + location.host + (location.port ? `:${location.port}`:'')
+        fetch(`http://localhost:3000/accessible_worker_module.js`).then(res=>{
+            console.log('=========FETCH STATIC=======')
+            console.log(res)
+        })
         this.emit('RESERVED_STRING', {str: array.reverse().join('')})
 
     }
