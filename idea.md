@@ -181,21 +181,20 @@ class Person {
 - 在构造 ChannelWorkerClient  和 FunctionSetWorkerProxyClient阶段  (Client 端)
 - worker.js, 线程池,线程注册表全都都放在Client端中
 
-## Worker Config
+## Accessible Worker Specific 
 
-- TTL
-- Strategy
-- minActive
-
-## 守护线程
-
-- 检查TTL
-
-## 线程池
-
+- 禁止在@AccessibleWorker中使用 ```self```引用
+- 可以引入第三方模块，但是需要一定的配置
+- AccessibleWorker 的 web worker 类型是 inline-worker，所以有一些额外限制
+- Functional Woker的函数尽量为纯函数
+- 尽量使用Functional Worker
+- 应该保持强类型约束并传递必要的类型参数来帮助编译器进行类型推导
+- 如果使用了第三方模块，必须要使用独立文件导入并打包为 es module 供 worker 引用
+- 
 
 
-## 任务队列
+
+
 
 
 

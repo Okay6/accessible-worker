@@ -1,8 +1,10 @@
 import {
     WORKER_DEFINITION,
     WORKER_INITIAL_FUNC,
+    WORKER_REGISTER_PARAMS,
     WorkerConfig,
     WorkerDefinition,
+    WorkerRegisterParams,
     WorkThread
 } from "./decorator/worker_definition";
 import {
@@ -16,7 +18,8 @@ import * as jsBeautify from './decorator/beautify.min.js'
 import {
     EventNames,
     EventParams,
-    EventsMap, Func,
+    EventsMap,
+    Func,
     FunctionSet,
     Proxify,
     UserEventNames,
@@ -123,7 +126,6 @@ export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap,
 }
 
 
-
 /*****************************************************************************/
 export class AccessibleWorkerFactory {
     /**
@@ -136,6 +138,7 @@ export class AccessibleWorkerFactory {
          *
          */
         const workerDefinition: WorkerDefinition = Reflect.getOwnMetadata(WORKER_DEFINITION, _t.prototype)
+        const workerRegisterParams: WorkerRegisterParams = Reflect.getOwnMetadata(WORKER_REGISTER_PARAMS, _t)
 
         const initialFunc = Reflect.getOwnMetadata(WORKER_INITIAL_FUNC, _t)
         let workerSourceCode: string = ''
@@ -146,26 +149,42 @@ export class AccessibleWorkerFactory {
             workerSourceCode = jsBeautify.js_beautify(workerSourceCode, {preserve_newlines: false})
 
         }
-        let resolveFunc: (arg: IChannelWorkerClient<O, I>) => void;
-
-        fetch('/accessible_worker_module.js').then(moduleSource => {
-            moduleSource.text().then(source => {
-                let replaceName: string = 'None';
-                const exportName = source.match(/(?<=export\s{0,}\{\s{0,})[\w_]+(?=\s{0,}as\s{0,}AccessibleWorkerModule\s{0,}\})/g);
-                if (exportName && exportName.length > 0) {
-                    replaceName = exportName[0]
-                }
-                const accessibleModule = source + '\n' + `var AccessibleWorkerModule = ${replaceName}` + '\n'
-                const client = new ChannelWorkerClient<O, I>(accessibleModule + workerSourceCode);
-                resolveFunc(client)
-            })
-        })
-
+        let resolveFunc: (arg: IChannelWorkerClient<O, I>) => void = () => {
+        };
         // return proxify(funcSet)
-        return new Promise<IChannelWorkerClient<O, I>>((resolve => {
+        const p = new Promise<IChannelWorkerClient<O, I>>((resolve => {
             resolveFunc = resolve
         }))
 
+        if (workerRegisterParams && workerRegisterParams.modules) {
+            const allModules: string[] = []
+            const modules = Object.keys(workerRegisterParams.modules);
+            for (let i = 0; i < modules.length; i++) {
+                const path = workerRegisterParams.modules[modules[i]]
+                fetch(`/${path}.js`).then(moduleSource => {
+                    moduleSource.text().then(source => {
+                        let replaceName: string = 'None';
+                        const r = new RegExp(`(?<=export\\s{0,}\\{\\s{0,})[\\w_]+(?=\\s{0,}as\\s{0,}${modules[i]}\\s{0,}\\})`,'g')
+                        const exportName = source.match(r);
+                        if (exportName && exportName.length > 0) {
+                            replaceName = exportName[0]
+                        }
+                        const accessibleModule = source + '\n' + `var ${modules[i]} = ${replaceName}`
+                        allModules.push(accessibleModule)
+                        if (i === modules.length - 1) {
+                            const modules = allModules.join('\n') +'\n'
+                            const client = new ChannelWorkerClient<O, I>(modules + workerSourceCode);
+                            resolveFunc(client)
+                        }
+                    })
+                })
+
+            }
+            return p
+        } else {
+            const client = new ChannelWorkerClient<O, I>(workerSourceCode);
+            return Promise.resolve<IChannelWorkerClient<O, I>>(client)
+        }
 
     }
 
@@ -174,7 +193,7 @@ export class AccessibleWorkerFactory {
      *
      */
 
-    public static registerFunctionSet<T extends FunctionSet>(funcSet: T, config?: {}): Promise<Proxify<T>> {
+    public static registerFunctionSet<T extends FunctionSet>(funcSet: T, workerRegisterParams?: WorkerRegisterParams): Promise<Proxify<T>> {
         const functionRecord: Record<string, string> = {}
         for (const key of Object.keys(funcSet)) {
             functionRecord[key] = funcSet[key].toString().replace(/[\d\w]+(?=.AccessibleWorkerModule)\./g, '')
@@ -182,27 +201,44 @@ export class AccessibleWorkerFactory {
         const globalFunctions = buildGlobalFunctions(functionRecord)
         let functionalWorkerCode = buildFunctionalWorkerJs(globalFunctions)
         functionalWorkerCode = jsBeautify.js_beautify(functionalWorkerCode, {preserve_newlines: false})
-        let resolveFunc: (arg: Proxify<T>) => void;
+        let resolveFunc: (arg: Proxify<T>) => void = ()=>{};
         /**
          * 该存储到存储结构中，后面使用fetch instance获取指定实例
          */
-        fetch('/accessible_worker_module.js').then(moduleSource => {
-            moduleSource.text().then(source => {
-                let replaceName: string = 'None';
-                const exportName = source.match(/(?<=export\s*{\s*)[\w_]+(?=\s*as\s*AccessibleWorkerModule\s*})/g);
-                if (exportName && exportName.length > 0) {
-                    replaceName = exportName[0]
-                }
-                const accessibleModule = source + '\n' + `var AccessibleWorkerModule = ${replaceName}` + '\n'
-                const f = new FunctionSetWorkerProxyClient<T>(funcSet, accessibleModule + functionalWorkerCode)
-                resolveFunc(f as Proxify<T>)
-            })
-        })
-
-        // return proxify(funcSet)
-        return new Promise<Proxify<T>>((resolve => {
+        const p = new Promise<Proxify<T>>((resolve => {
             resolveFunc = resolve
         }))
+
+        if (workerRegisterParams && workerRegisterParams.modules) {
+            const allModules: string[] = []
+            const modules = Object.keys(workerRegisterParams.modules);
+            for (let i = 0; i < modules.length; i++) {
+                const path = workerRegisterParams.modules[modules[i]]
+                fetch(`/${path}.js`).then(moduleSource => {
+                    moduleSource.text().then(source => {
+                        let replaceName: string = 'None';
+                        const r = new RegExp(`(?<=export\\s{0,}\\{\\s{0,})[\\w_]+(?=\\s{0,}as\\s{0,}${modules[i]}\\s{0,}\\})`,'g')
+                        const exportName = source.match(r);
+                        if (exportName && exportName.length > 0) {
+                            replaceName = exportName[0]
+                        }
+                        const accessibleModule = source + '\n' + `var ${modules[i]} = ${replaceName}`
+                        allModules.push(accessibleModule)
+                        if (i === modules.length - 1) {
+                            const modules = allModules.join('\n') +'\n'
+                            const f = new FunctionSetWorkerProxyClient<T>(funcSet,modules +functionalWorkerCode)
+                            resolveFunc(f as Proxify<T>)
+                        }
+                    })
+                })
+
+            }
+            return p
+        } else {
+            const f = new FunctionSetWorkerProxyClient<T>(funcSet,  functionalWorkerCode)
+
+            return Promise.resolve<Proxify<T>>(f as Proxify<T>)
+        }
     }
 
     public static getChannelWorkerClient<I extends EventsMap, O extends EventsMap>(_t: new () => ChannelWorkerDefinition<I, O>):

@@ -11,8 +11,13 @@ export interface WorkThread {
 
 }
 
+export interface WorkerRegisterParams {
+    modules?: { [module: string]: string }
+}
+
 export const WORKER_DEFINITION = Symbol('WORKER_DEFINITION')
 export const WORKER_INITIAL_FUNC = Symbol('WORKER_INITIAL_FUNC')
+export const WORKER_REGISTER_PARAMS = Symbol('WORKER_REGISTER_PARAMS')
 
 export interface WorkerConfig {
     ttl: number;
@@ -87,9 +92,13 @@ type ValueMatchedKey<Type, Value> = {
 
 
 /*******************************************************/
-export const AccessibleWorker = () => {
+export const AccessibleWorker = (workerRegisterParams?: WorkerRegisterParams) => {
+
     return (target: Type<ChannelWorkerDefinition<EventsMap, EventsMap>>) => {
 
+        if (workerRegisterParams) {
+            Reflect.defineMetadata(WORKER_REGISTER_PARAMS, workerRegisterParams, target)
+        }
 
         // 检查 Class 构造器
 

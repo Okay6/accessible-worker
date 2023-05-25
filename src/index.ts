@@ -20,7 +20,9 @@ type OutputEvents = {
 }
 
 // Define Accessible Worker Description Class
-@AccessibleWorker()
+@AccessibleWorker({
+    modules: {AccessibleWorkerModule: 'accessible_worker_module'}
+})
 class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
     constructor() {
         super()
@@ -32,7 +34,7 @@ class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEven
     @GlobalVariable<number>()
     count = 0
     @GlobalVariable<any>()
-    timer :any
+    timer: any
 
     @SubscribeMessage<InputEvents>('COMBINE_MESSAGE')
     async combineMessage(data: AWT.InferParams<InputEvents, 'COMBINE_MESSAGE'>) {
@@ -90,7 +92,11 @@ const functionSet = {
 // register Channel Worker
 const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyAccessibleWorker)
 // register Functional Worker
-const functionalWorkerClient = AccessibleWorkerFactory.registerFunctionSet(functionSet)
+const functionalWorkerClient = AccessibleWorkerFactory
+    .registerFunctionSet(functionSet,
+        {modules:
+                {AccessibleWorkerModule: 'accessible_worker_module'}
+})
 
 // Use Functional Client
 functionalWorkerClient.then(f => {
@@ -117,13 +123,13 @@ functionalWorkerClient.then(f => {
         console.log(res)
     })
 })
-const begin  = document.getElementById('begin-count') as HTMLButtonElement
+const begin = document.getElementById('begin-count') as HTMLButtonElement
 
-const countP =  document.getElementById('count') as HTMLParagraphElement
+const countP = document.getElementById('count') as HTMLParagraphElement
 // Use Channel Client
 channelWorkerClient.then(client => {
-    if(begin){
-        begin.addEventListener('click',()=>  client.emit('BEGIN_COUNT'))
+    if (begin) {
+        begin.addEventListener('click', () => client.emit('BEGIN_COUNT'))
     }
 
     client.on('COMBINED_MESSAGE', (msg: string) => {
@@ -138,10 +144,10 @@ channelWorkerClient.then(client => {
         console.log('======RESERVED STRING======')
         console.log(res.str)
     })
-    client.on('SEND_COUNT',count=>{
-       if(countP){
-           countP.innerText = String(count)
-       }
+    client.on('SEND_COUNT', count => {
+        if (countP) {
+            countP.innerText = String(count)
+        }
     })
 
 
