@@ -6,12 +6,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            templateParameters: {
-                assets: {
-                    publicPath: 'dist',
-                    js: ['accessible_worker_module.js']
-                }
-            }
+           template:'./src/index.html'
         })
     ],
     output: {

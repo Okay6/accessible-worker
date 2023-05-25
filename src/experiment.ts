@@ -29,7 +29,7 @@ export interface IChannelWorkerClient<ListenEvents extends EventsMap, EmitEvents
 
     // Parameters 在 Web Storm 中 报错 Rest parameter must be an array type or a generic with array constraint，但编译通过，暂时忽略
     //noinspection all
-    emit<Ev extends EventNames<EmitEvents>>(ev: Ev, arg: EventParams<EmitEvents, Ev>): void;
+    emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...arg: EventParams<EmitEvents, Ev>): void;
 
 }
 
@@ -102,7 +102,7 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
     }
 
     //noinspection all
-    emit<Ev extends EventNames<O>>(ev: Ev, arg: EventParams<O, Ev>): void {
+    emit<Ev extends EventNames<O>>(ev: Ev, ...arg: EventParams<O, Ev>): void {
         this.worker.postMessage({event: ev, args: arg})
     }
 
@@ -117,7 +117,7 @@ export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap,
     }
 
     //noinspection all
-    emit<Ev extends EventNames<EmitEvents>>(ev: Ev, arg: EventParams<EmitEvents, Ev>): void {
+    emit<Ev extends EventNames<EmitEvents>>(ev: Ev, ...arg: EventParams<EmitEvents, Ev>): void {
 
     }
 }
