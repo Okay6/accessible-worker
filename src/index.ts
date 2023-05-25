@@ -22,7 +22,9 @@ type OutputEvents = {
 
 // Define Accessible Worker Description Class
 @AccessibleWorker({
-    module:{name:'AccessibleWorkerModule', relativePath:'accessible_worker_module'}
+    module: {
+        name: 'AccessibleWorkerModule',
+        relativePath: 'accessible_worker_module'}
 })
 class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
     constructor() {
@@ -88,7 +90,8 @@ const functionSet = {
     uuid: (): string => new Date().getTime().toString(),
     combine: (msg: string) => new Date().getTime().toString() + ' ' + msg,
     factorial: (num: number): number => new AccessibleWorkerModule.CalculateClass().factorial(num),
-    getMsg: (): string => 'Accessible Worker &^<>^&'
+    getMsg: (): string => 'Accessible Worker &^<>^&',
+    realUUID: () => AccessibleWorkerModule.uuid()
 }
 // register Channel Worker
 const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyAccessibleWorker)
@@ -96,7 +99,8 @@ const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputE
 const functionalWorkerClient = AccessibleWorkerFactory
     .registerFunctionSet(functionSet,
         {
-            module:{name:'AccessibleWorkerModule', relativePath:'accessible_worker_module'}
+            module: {name: 'AccessibleWorkerModule',
+                relativePath: 'accessible_worker_module'}
         })
 
 // Use Functional Client
@@ -122,6 +126,9 @@ functionalWorkerClient.then(f => {
     })
     f.getMsg().then(res => {
         console.log(res)
+    })
+    f.realUUID().then(uuid => {
+        console.log(uuid)
     })
 })
 const begin = document.getElementById('begin-count') as HTMLButtonElement

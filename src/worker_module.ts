@@ -1,3 +1,5 @@
+import {v4 as uuidv4} from 'uuid'
+
 class CalculateClass {
     factorial(num: number): number {
         if (num > 1) {
@@ -12,7 +14,8 @@ export const AccessibleWorkerModule = {
     var: 'variable',
     a: '1',
     b: '2',
-    CalculateClass: CalculateClass
+    CalculateClass: CalculateClass,
+    uuid: uuidv4
 }
 
 
