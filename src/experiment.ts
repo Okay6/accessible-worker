@@ -274,7 +274,7 @@ export class AccessibleWorkerFactory {
         fetch('/accessible_worker_module.js').then(moduleSource => {
             moduleSource.text().then(source => {
                 let replaceName: string = 'None';
-                const exportName = source.match(/(?<=export\s{0,}\{\s{0,})[\w_]+(?=\s{0,}as\s{0,}AccessibleWorkerModule\s{0,}\})/g);
+                const exportName = source.match(/(?<=export\s*{\s*)[\w_]+(?=\s*as\s*AccessibleWorkerModule\s*})/g);
                 if (exportName && exportName.length > 0) {
                     replaceName = exportName[0]
                 }
