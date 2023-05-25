@@ -1,7 +1,4 @@
 import {
-    AccessibleWorker,
-    GlobalVariable,
-    SubscribeMessage,
     WORKER_DEFINITION,
     WORKER_INITIAL_FUNC,
     WorkerConfig,
@@ -16,84 +13,16 @@ import {
 } from "./template/accessible_worker";
 /// <reference path = './decorator/beautify.min.d.ts' />
 import * as jsBeautify from './decorator/beautify.min.js'
-import {AccessibleWorkerModule} from "./worker_module";
+import {
+    EventNames,
+    EventParams,
+    EventsMap, Func,
+    FunctionSet,
+    Proxify,
+    UserEventNames,
+    UserListener
+} from "./accessible_worker_types";
 
-/**
- * An events map is an interface that maps event names to their value, which
- * represents the type of the `on` listener.
- */
-export type EventsMap = {
-    [key: string]: (arg: any) => void
-}
-
-/**
- * The default events map, used if no EventsMap is given. Using this EventsMap
- * is equivalent to accepting all event names, and any data.
- */
-export interface DefaultEventsMap {
-    [key: string]: Func
-}
-
-/**
- * Returns a union type containing all the keys of an event map.
- */
-export type EventNames<Map extends EventsMap> = keyof Map & (string | symbol);
-
-
-/** The tuple type representing the parameters of an event listener */
-export type EventParams<Map extends EventsMap,
-    Ev extends EventNames<Map>> = Parameters<Map[Ev]> extends Array<any> ? Parameters<Map[Ev]>[0] : never
-
-
-/**
- * The event names that are either in ReservedEvents or in UserEvents
- */
-export type UserEventNames<UserEvents extends EventsMap> = EventNames<UserEvents>;
-
-/**
- * Type of a listener of a user event or a reserved event. If `Ev` is in
- * `ReservedEvents`, the reserved event listener is returned.
- */
-export type UserListener<UserEvents extends EventsMap,
-    Ev extends keyof UserEvents> = UserEvents[Ev]
-
-
-/****************************************************/
-/**
- * 1.如果本身就返回Promise类型，就不对其类型进行包装
- * 2.如果本身返回类型不是Promise，则使用Promise对返回类型进行包装
- */
-type PromiseWrapper<Value> =
-    Value extends Promise<any> ? Value : Promise<Value>;
-
-
-type wrap<C, D extends Array<any>> = (...arg: D) => C extends Func ? PromiseWrapper<ReturnType<C>> : never
-
-
-type Proxify<T> = {
-    [P in keyof T]: wrap<T[P], T[P] extends Func ? Parameters<T[P]> : []>;
-};
-
-
-type Func = (...args: never[]) => never | void
-
-export  type  FunctionSet = {
-    [key: string | symbol]: Func
-}
-
-
-function proxify<T>(o: T): Proxify<T> {
-    return o as unknown as Proxify<T>
-}
-
-
-/****************************************************/
-export type  SubscribeCallBack<I> = {
-    // eslint-disable-next-line functional/no-return-void
-    readonly onData: (data: I) => void;
-    // eslint-disable-next-line functional/no-return-void
-    readonly onError: (error: never) => void;
-}
 
 export interface IChannelWorkerClient<ListenEvents extends EventsMap, EmitEvents extends EventsMap> {
     on<Ev extends UserEventNames<ListenEvents>>(ev: Ev, listener: UserListener<ListenEvents, Ev>): void;
@@ -174,16 +103,8 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
 
     //noinspection all
     emit<Ev extends EventNames<O>>(ev: Ev, arg: EventParams<O, Ev>): void {
-        // 1. 查看threadPool 是否存在空闲线程
-        // 2. 如果存在，直接使用空闲线程
-        // 3. 如果不存在，查看WorkerConfig 的strategy，如果是PERFORMANCE，则创建新线程并提交任务
-        // 如果的strategy为MEMORY_SAVE，则将任务放入taskQueue，等待空闲线程调度
-        //
         this.worker.postMessage({event: ev, args: arg})
-
-
     }
-
 
 }
 
@@ -199,43 +120,9 @@ export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap,
     emit<Ev extends EventNames<EmitEvents>>(ev: Ev, arg: EventParams<EmitEvents, Ev>): void {
 
     }
-
-    terminalAll() {
-
-    }
-
-    // @Subscribe<'PRC_RESOLVE'>('PRC_RESOLVE')
-    // customerEvent(@EventData data: { msg: string }) {
-    //     /**
-    //      * customer logic
-    //      */
-    //
-    //     this.emit()
-    // }
-
 }
 
 
-export type InferParameterType<E extends EventsMap, K extends keyof EventsMap> =
-    Parameters<E[K]> extends Array<any> ? Parameters<E[K]>[0] : never
-
-
-/*****************************************************************************/
-/**
- *  AccessibleWorkerFactory负责注册,  存储worker实例
- *  AccessibleWorkerFactory应为单例模式
- *  根使用类型作为参数获取Factory提供的实例进行使用
- *
- *
- */
-/*****************************************************************************/
-/**
- *  AccessibleWorkerFactory负责注册,  存储worker实例
- *  AccessibleWorkerFactory应为单例模式
- *  根使用类型作为参数获取Factory提供的实例进行使用
- *
- *
- */
 
 /*****************************************************************************/
 export class AccessibleWorkerFactory {

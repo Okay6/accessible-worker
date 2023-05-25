@@ -1,10 +1,11 @@
-import {ChannelWorkerDefinition, EventsMap} from "../experiment";
+import {ChannelWorkerDefinition} from "../experiment";
 import "reflect-metadata"
 import {Node, parse} from 'acorn'
 import {full} from 'acorn-walk'
 
 /// <reference path = './beautify.min.d.ts' />
 import * as jsBeautify from './beautify.min.js'
+import {EventsMap} from "../accessible_worker_types";
 
 export interface WorkThread {
 
