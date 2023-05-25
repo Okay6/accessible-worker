@@ -1,7 +1,7 @@
 import {AccessibleWorker, GlobalVariable, SubscribeMessage} from "./decorator/worker_definition";
 import {AccessibleWorkerModule} from "./worker_module";
-import * as experiment from "./experiment";
 import * as AWT from "./accessible_worker_type_infer";
+import {AccessibleWorkerFactory, ChannelWorkerDefinition} from "./experiment";
 
 /******************************* Accessible Worker Demo **************************************/
 // Define I/O events
@@ -21,7 +21,7 @@ type OutputEvents = {
 
 // Define Accessible Worker Description Class
 @AccessibleWorker()
-class MyAccessibleWorker extends experiment.ChannelWorkerDefinition<InputEvents, OutputEvents> {
+class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
     constructor() {
         super()
         this.prefix = 'Hi'
@@ -88,9 +88,9 @@ const functionSet = {
     getMsg: (): string => 'Accessible Worker &^<>^&'
 }
 // register Channel Worker
-const channelWorkerClient = experiment.AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyAccessibleWorker)
+const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyAccessibleWorker)
 // register Functional Worker
-const functionalWorkerClient = experiment.AccessibleWorkerFactory.registerFunctionSet(functionSet)
+const functionalWorkerClient = AccessibleWorkerFactory.registerFunctionSet(functionSet)
 
 // Use Functional Client
 functionalWorkerClient.then(f => {
