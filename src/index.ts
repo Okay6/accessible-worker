@@ -2,6 +2,7 @@ import {AccessibleWorker, GlobalVariable, SubscribeMessage} from "./decorator/wo
 import {AccessibleWorkerModule} from "./worker_module";
 import * as experiment from "./experiment";
 import * as AWT from "./accessible_worker_type_infer";
+import {InferParams} from "./accessible_worker_type_infer";
 
 /******************************* Accessible Worker Demo **************************************/
 // Define I/O events
@@ -29,19 +30,19 @@ class MyAccessibleWorker extends experiment.ChannelWorkerDefinition<InputEvents,
     prefix: string = 'Hello'
 
     @SubscribeMessage<InputEvents>('COMBINE_MESSAGE')
-    async combineMessage(data: AWT.InferParameterType<InputEvents, 'COMBINE_MESSAGE'>) {
+    async combineMessage(data: AWT.InferParams<InputEvents, 'COMBINE_MESSAGE'>) {
         console.log(AccessibleWorkerModule.a + AccessibleWorkerModule.b)
         this.emit('COMBINED_MESSAGE', `${this.prefix} ${data.name}`)
 
     }
 
     @SubscribeMessage<InputEvents>('DOUBLE_NUMBER')
-    async addNumber(data: AWT.InferParameterType<InputEvents, 'DOUBLE_NUMBER'>) {
+    async addNumber(data: AWT.InferParams<InputEvents, 'DOUBLE_NUMBER'>) {
         this.emit('DOUBLED_NUMBER', data * 2)
     }
 
     @SubscribeMessage<InputEvents>('RESERVE_STRING')
-    async reserveString(data: AWT.InferParameterType<InputEvents, 'RESERVE_STRING'>) {
+    async reserveString(data: AWT.InferParams<InputEvents, 'RESERVE_STRING'>) {
         const array = []
         for (let i = 0; i < data.str.length; i++) {
             array.push(data.str.at(i))
