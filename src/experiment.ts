@@ -1,7 +1,6 @@
 import {
     AccessibleWorker,
     GlobalVariable,
-    MessageData,
     SubscribeMessage,
     WORKER_DEFINITION,
     WORKER_INITIAL_FUNC,
@@ -151,6 +150,7 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
     private eventHandlerRecord: Record<string | symbol, Func> = {}
 
     on<Ev extends UserEventNames<I>>(ev: Ev, listener: UserListener<I, Ev>): void {
+
         this.eventHandlerRecord[ev] = listener
     }
 
@@ -165,6 +165,7 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
 
 
     }
+
 
 
 }
@@ -327,25 +328,25 @@ class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEven
     prefix: string = 'Hello'
 
     @SubscribeMessage<InputEvents>('COMBINE_MESSAGE')
-    async combineMessage(@MessageData() data: InferParameterType<InputEvents, 'COMBINE_MESSAGE'>) {
+    async combineMessage(data: InferParameterType<InputEvents, 'COMBINE_MESSAGE'>) {
         console.log(AccessibleWorkerModule.a + AccessibleWorkerModule.b)
         this.emit('COMBINED_MESSAGE', `${this.prefix} ${data}`)
 
     }
 
     @SubscribeMessage<InputEvents>('DOUBLE_NUMBER')
-    async addNumber(@MessageData() data: InferParameterType<InputEvents, 'DOUBLE_NUMBER'>) {
+    async addNumber(data: InferParameterType<InputEvents, 'DOUBLE_NUMBER'>) {
         this.emit('DOUBLED_NUMBER', data * 2)
     }
 
     @SubscribeMessage<InputEvents>('RESERVE_STRING')
-    async reserveString(@MessageData() data: InferParameterType<InputEvents, 'RESERVE_STRING'>) {
+    async reserveString(data: InferParameterType<InputEvents, 'RESERVE_STRING'>) {
         const array = []
         for (let i = 0; i < data.str.length; i++) {
             array.push(data.str.at(i))
         }
-        const domain = location.protocol + '//' + location.host + (location.port ? `:${location.port}`:'')
-        fetch(`http://localhost:3000/accessible_worker_module.js`).then(res=>{
+        const domain = location.protocol + '//' + location.host + (location.port ? `:${location.port}` : '')
+        fetch(`http://localhost:3000/accessible_worker_module.js`).then(res => {
             console.log('=========FETCH STATIC=======')
             console.log(res)
         })
@@ -405,7 +406,7 @@ channelWorkerClient.then(client => {
     })
     client.emit('COMBINE_MESSAGE', 'lee')
     client.emit('COMBINE_MESSAGE', 'okay6')
-    client.emit('DOUBLE_NUMBER', 4)
+    client.emit('DOUBLE_NUMBER', 23)
     client.emit('RESERVE_STRING', {str: 'okay6'})
 
 })
