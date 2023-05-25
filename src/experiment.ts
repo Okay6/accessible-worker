@@ -173,13 +173,13 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
     }
 
     //noinspection all
-    emit<Ev extends EventNames<O>>(ev: Ev, ...args: EventParams<O, Ev>): void {
+    emit<Ev extends EventNames<O>>(ev: Ev, arg: EventParams<O, Ev>): void {
         // 1. 查看threadPool 是否存在空闲线程
         // 2. 如果存在，直接使用空闲线程
         // 3. 如果不存在，查看WorkerConfig 的strategy，如果是PERFORMANCE，则创建新线程并提交任务
         // 如果的strategy为MEMORY_SAVE，则将任务放入taskQueue，等待空闲线程调度
         //
-        this.worker.postMessage({event: ev, args: args})
+        this.worker.postMessage({event: ev, args: arg})
 
 
     }
