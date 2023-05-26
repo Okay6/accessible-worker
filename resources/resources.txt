@@ -10,3 +10,6 @@ Webpack 配置集合
 https://stackoverflow.com/questions/35903246/how-to-create-multiple-output-paths-in-webpack-config
 
 Web Storm Theme = Material Darker
+
+Apache license 2.0
+https://codeleading.com/article/12614170127/
