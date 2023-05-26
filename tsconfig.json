@@ -10,7 +10,7 @@
             "es5",
             "es6",
             "DOM",
-            "webworker"
+            "webworker",
         ],
         "allowJs": true,
         "skipLibCheck": true,
@@ -23,10 +23,10 @@
         "moduleResolution": "node",
         "resolveJsonModule": true,
         "noEmit": false,
-        "types": ["cypress", "node"]
+        "types": ["cypress", "node","mocha","chai"]
     },
     "include": ["src/**/*", "typings/**/*.ts",
-        "cypress/**/*.ts"
+        "cypress/**/*.ts","test"
     ],
     "exclude": ["node_modules/**"],
 }

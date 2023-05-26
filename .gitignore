@@ -2,6 +2,7 @@ node_modules
 .idea
 dist
 coverage
+coverage_unit
 .nyc_output
 cypress/downloads
 cypress/screenshots
