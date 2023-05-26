@@ -7,13 +7,15 @@
     "build": "webpack --config webpack.config.js && webpack  --config webpack.aw.config.js",
     "dev": "webpack-dev-server --config webpack.config.js",
     "awm": "webpack --config webpack.aw.config.js",
-    "serve": "http-server dist -a 0.0.0.0 -p 9090"
+    "serve": "http-server dist -a 0.0.0.0 -p 9090",
+    "cy:open": "cypress open"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/lodash": "^4.14.195",
     "@types/uuid": "^9.0.1",
+    "cypress": "^12.13.0",
     "hook-shell-script-webpack-plugin": "^0.3.0",
     "html-webpack-plugin": "^5.5.1",
     "ts-loader": "^9.4.2",

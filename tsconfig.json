@@ -22,10 +22,10 @@
         "module": "esnext",
         "moduleResolution": "node",
         "resolveJsonModule": true,
-        "isolatedModules": true,
         "noEmit": false,
-        "jsx": "react-jsx"
+        "jsx": "react-jsx",
+        "types": ["cypress", "node"]
     },
-    "include": ["src/**/*", "typings/**/*.ts"],
+    "include": ["src/**/*", "typings/**/*.ts", "cypress/**/*.ts"],
     "exclude": ["node_modules/**"],
 }
