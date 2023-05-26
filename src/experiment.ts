@@ -158,21 +158,30 @@ export class AccessibleWorkerFactory {
 
         if (workerRegisterParams && workerRegisterParams.module) {
             fetch(`/${workerRegisterParams.module.relativePath}.js`).then(moduleSource => {
-                moduleSource.text().then(source => {
-                    let replaceName: string = 'None';
-                    const r = new RegExp(`(?<=export\\s{0,}\\{\\s{0,})[\\w_]+(?=\\s{0,}as\\s{0,}${workerRegisterParams.module?.name}\\s{0,}\\})`, 'g')
-                    const exportName = source.match(r);
-                    if (exportName && exportName.length > 0) {
-                        replaceName = exportName[0]
-                    }
-                    const accessibleModule = source + '\n' + `var ${workerRegisterParams.module?.name} = ${replaceName}`
+               if(moduleSource.ok){
+                   moduleSource.text().then(source => {
+                       let replaceName: string = 'None';
+                       const r = new RegExp(`(?<=export\\s{0,}\\{\\s{0,})[\\w_]+(?=\\s{0,}as\\s{0,}${workerRegisterParams.module?.name}\\s{0,}\\})`, 'g')
+                       const exportName = source.match(r);
+                       if (exportName && exportName.length > 0) {
+                           replaceName = exportName[0]
+                       }
+                       const accessibleModule = source + '\n' + `var ${workerRegisterParams.module?.name} = ${replaceName}`
 
 
-                    const client = new ChannelWorkerClient<O, I>(accessibleModule +'\n'+ workerSourceCode);
+                       const client = new ChannelWorkerClient<O, I>(accessibleModule +'\n'+ workerSourceCode);
 
-                    resolveFunc(client)
+                       resolveFunc(client)
 
-                })
+                   })
+               }else{
+                   return Promise.reject({
+                       status: moduleSource.status,
+                       statusText: moduleSource.statusText
+                   })
+               }
+            }).catch(err=>{
+     throw new Error(`Accessible Worker register error when fetching module:${JSON.stringify(workerRegisterParams.module)}|${JSON.stringify(err)}`)
             })
             return p
         } else {
