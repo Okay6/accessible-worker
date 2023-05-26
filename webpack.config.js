@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+const babelConfig = require('./babel.config');
 const HookShellScriptPlugin = require('hook-shell-script-webpack-plugin');
 module.exports = {
     entry: {
@@ -24,9 +25,16 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
-                use: "ts-loader",
-                exclude: "/node-modules/"
+                test: /\.(ts|tsx)$/,
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: { ...babelConfig },
+                    },
+                    {
+                        loader: "ts-loader",
+                    }
+                ],
             },
         ]
     },

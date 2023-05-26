@@ -1,0 +1,6 @@
+{
+ "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "all": true
+  }
+}

@@ -1,3 +1,8 @@
 node_modules
 .idea
 dist
+coverage
+.nyc_output
+cypress/downloads
+cypress/screenshots
+cypress/videos
