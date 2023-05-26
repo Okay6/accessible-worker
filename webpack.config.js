@@ -1,5 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
+const HookShellScriptPlugin = require('hook-shell-script-webpack-plugin');
 module.exports = {
     entry: {
         "main": "./src/index.ts",
@@ -7,6 +9,9 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
            template:'./src/index.html'
+        }),
+        new HookShellScriptPlugin({
+            afterEmit: ['npm run awm']
         })
     ],
     output: {
