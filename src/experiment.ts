@@ -170,7 +170,10 @@ export class AccessibleWorkerFactory {
                         const exportName = source.match(r);
                         if (exportName && exportName.length > 0) {
                             replaceName = exportName[0]
+                            const replaceExport = new RegExp(`export\\s*\\{\\s*[\\w_]+\\sas\\s${workerRegisterParams.module?.name}\\s*\\};*`,'g');
+                            source = source.replace(replaceExport,'')
                         }
+
                         const accessibleModule = source + '\n' + `var ${workerRegisterParams.module?.name} = ${replaceName}`
 
 
@@ -231,6 +234,8 @@ export class AccessibleWorkerFactory {
                     const exportName = source.match(r);
                     if (exportName && exportName.length > 0) {
                         replaceName = exportName[0]
+                        const replaceExport = new RegExp(`export\\s*\\{\\s*[\\w_]+\\sas\\s${workerRegisterParams.module?.name}\\s*\\};*`,'g');
+                        source = source.replace(replaceExport,'')
                     }
                     const accessibleModule = source + '\n' + `var ${workerRegisterParams.module?.name} = ${replaceName}`
 
