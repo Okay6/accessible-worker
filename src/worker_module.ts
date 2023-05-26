@@ -1,4 +1,5 @@
 import {v4 as uuidv4} from 'uuid'
+import _ from "lodash";
 
 class CalculateClass {
     factorial(num: number): number {
@@ -15,7 +16,8 @@ export const MyOwnModule = {
     a: '1',
     b: '2',
     CalculateClass: CalculateClass,
-    uuid: uuidv4
+    uuid: uuidv4,
+    endWith: _.endsWith
 }
 
 

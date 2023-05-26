@@ -2,6 +2,7 @@ import {AccessibleWorker, GlobalVariable, SubscribeMessage} from "./decorator/wo
 import {MyOwnModule} from "./worker_module";
 import * as AWT from "./accessible_worker_type_infer";
 import {AccessibleWorkerFactory, ChannelWorkerDefinition} from "./experiment";
+import _ from "lodash";
 
 
 /******************************* Accessible Worker Demo **************************************/
@@ -24,7 +25,8 @@ type OutputEvents = {
 @AccessibleWorker({
     module: {
         name: 'MyOwnModule',
-        relativePath: 'accessible_worker_module'}
+        relativePath: 'accessible_worker_module'
+    }
 })
 class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
     constructor() {
@@ -91,7 +93,8 @@ const functionSet = {
     combine: (msg: string) => new Date().getTime().toString() + ' ' + msg,
     factorial: (num: number): number => new MyOwnModule.CalculateClass().factorial(num),
     getMsg: (): string => 'Accessible Worker &^<>^&',
-    realUUID: () => MyOwnModule.uuid()
+    realUUID: () => MyOwnModule.uuid(),
+    endsWith: (str: string, suffix: string) => MyOwnModule.endWith(str,suffix)
 }
 // register Channel Worker
 const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyAccessibleWorker)
@@ -99,8 +102,10 @@ const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputE
 const functionalWorkerClient = AccessibleWorkerFactory
     .registerFunctionSet(functionSet,
         {
-            module: {name: 'MyOwnModule',
-                relativePath: 'accessible_worker_module'}
+            module: {
+                name: 'MyOwnModule',
+                relativePath: 'accessible_worker_module'
+            }
         })
 
 // Use Functional Client
@@ -130,6 +135,11 @@ functionalWorkerClient.then(f => {
     f.realUUID().then(uuid => {
         console.log(uuid)
     })
+    f.endsWith('lee', 'e').then(res => {
+        console.log('=====END WITH===')
+        console.log(res ? 'YES' : 'NO')
+    })
+
 })
 const begin = document.getElementById('begin-count') as HTMLButtonElement
 
