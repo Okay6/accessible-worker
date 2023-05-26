@@ -188,7 +188,7 @@ export const AccessibleWorker = (workerRegisterParams?: WorkerRegisterParams) =>
         }
         const initFunc = funcSplit.join('')
         let initWorker = initFunc.replace(/(?<=function\s).+(?=\()/, '__aw_init__')
-        initWorker = initWorker.replace(/[\d\w]+(?=.AccessibleWorkerModule)\./g, '')
+
         initWorker = jsBeautify.js_beautify(initWorker)
 
         Reflect.defineMetadata(WORKER_INITIAL_FUNC, initWorker, target)
@@ -261,7 +261,7 @@ export const SubscribeMessage = <E extends EventsMap>(msg: keyof E) => {
                     workerDefinition = {globalFunctions: {}, globalVariables: []}
                 }
                 workerDefinition.globalFunctions[msg.toString()] = funcSplit.join('')
-                    .replace(/[\d\w]+(?=.AccessibleWorkerModule)\./g, '')
+
                 workerDefinition.globalFunctions = {...workerDefinition.globalFunctions}
                 Reflect.defineMetadata(WORKER_DEFINITION, workerDefinition, target)
 

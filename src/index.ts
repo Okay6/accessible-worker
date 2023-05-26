@@ -1,5 +1,5 @@
 import {AccessibleWorker, GlobalVariable, SubscribeMessage} from "./decorator/worker_definition";
-import {AccessibleWorkerModule} from "./worker_module";
+import {MyOwnModule} from "./worker_module";
 import * as AWT from "./accessible_worker_type_infer";
 import {AccessibleWorkerFactory, ChannelWorkerDefinition} from "./experiment";
 
@@ -23,7 +23,7 @@ type OutputEvents = {
 // Define Accessible Worker Description Class
 @AccessibleWorker({
     module: {
-        name: 'AccessibleWorkerModule',
+        name: 'MyOwnModule',
         relativePath: 'accessible_worker_module'}
 })
 class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEvents> {
@@ -41,7 +41,7 @@ class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEven
 
     @SubscribeMessage<InputEvents>('COMBINE_MESSAGE')
     async combineMessage(data: AWT.InferParams<InputEvents, 'COMBINE_MESSAGE'>) {
-        console.log(AccessibleWorkerModule.a + AccessibleWorkerModule.b)
+        console.log(MyOwnModule.a + MyOwnModule.b)
         this.emit('COMBINED_MESSAGE', `${this.prefix} ${data.name}`)
 
     }
@@ -89,9 +89,9 @@ const functionSet = {
     sub: (a: number, b: number): Promise<number> => Promise.resolve(a - b),
     uuid: (): string => new Date().getTime().toString(),
     combine: (msg: string) => new Date().getTime().toString() + ' ' + msg,
-    factorial: (num: number): number => new AccessibleWorkerModule.CalculateClass().factorial(num),
+    factorial: (num: number): number => new MyOwnModule.CalculateClass().factorial(num),
     getMsg: (): string => 'Accessible Worker &^<>^&',
-    realUUID: () => AccessibleWorkerModule.uuid()
+    realUUID: () => MyOwnModule.uuid()
 }
 // register Channel Worker
 const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyAccessibleWorker)
@@ -99,7 +99,7 @@ const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputE
 const functionalWorkerClient = AccessibleWorkerFactory
     .registerFunctionSet(functionSet,
         {
-            module: {name: 'AccessibleWorkerModule',
+            module: {name: 'MyOwnModule',
                 relativePath: 'accessible_worker_module'}
         })
 

@@ -10,7 +10,7 @@ class CalculateClass {
     }
 }
 
-export const AccessibleWorkerModule = {
+export const MyOwnModule = {
     var: 'variable',
     a: '1',
     b: '2',

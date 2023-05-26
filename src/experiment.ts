@@ -140,11 +140,16 @@ export class AccessibleWorkerFactory {
         const workerDefinition: WorkerDefinition = Reflect.getOwnMetadata(WORKER_DEFINITION, _t.prototype)
         const workerRegisterParams: WorkerRegisterParams = Reflect.getOwnMetadata(WORKER_REGISTER_PARAMS, _t)
 
-        const initialFunc = Reflect.getOwnMetadata(WORKER_INITIAL_FUNC, _t)
+        let initialFunc = Reflect.getOwnMetadata(WORKER_INITIAL_FUNC, _t)
         let workerSourceCode: string = ''
         if (workerDefinition && initialFunc) {
             const globalVariables: string = buildGlobalVariables(workerDefinition.globalVariables)
-            const globalFunctions: string = buildGlobalFunctions(workerDefinition.globalFunctions)
+            let globalFunctions: string = buildGlobalFunctions(workerDefinition.globalFunctions)
+            if (workerRegisterParams.module) {
+                const r = new RegExp(`[\\d\\w]+(?=.${workerRegisterParams.module.name})\\.`, 'g')
+                globalFunctions = globalFunctions.replace(r, '')
+                initialFunc = initialFunc.replace(r, '')
+            }
             workerSourceCode = buildWorkerJs(initialFunc, globalFunctions, globalVariables)
             workerSourceCode = jsBeautify.js_beautify(workerSourceCode, {preserve_newlines: false})
 
@@ -158,30 +163,30 @@ export class AccessibleWorkerFactory {
 
         if (workerRegisterParams && workerRegisterParams.module) {
             fetch(`/${workerRegisterParams.module.relativePath}.js`).then(moduleSource => {
-               if(moduleSource.ok){
-                   moduleSource.text().then(source => {
-                       let replaceName: string = 'None';
-                       const r = new RegExp(`(?<=export\\s{0,}\\{\\s{0,})[\\w_]+(?=\\s{0,}as\\s{0,}${workerRegisterParams.module?.name}\\s{0,}\\})`, 'g')
-                       const exportName = source.match(r);
-                       if (exportName && exportName.length > 0) {
-                           replaceName = exportName[0]
-                       }
-                       const accessibleModule = source + '\n' + `var ${workerRegisterParams.module?.name} = ${replaceName}`
+                if (moduleSource.ok) {
+                    moduleSource.text().then(source => {
+                        let replaceName: string = 'None';
+                        const r = new RegExp(`(?<=export\\s{0,}\\{\\s{0,})[\\w_]+(?=\\s{0,}as\\s{0,}${workerRegisterParams.module?.name}\\s{0,}\\})`, 'g')
+                        const exportName = source.match(r);
+                        if (exportName && exportName.length > 0) {
+                            replaceName = exportName[0]
+                        }
+                        const accessibleModule = source + '\n' + `var ${workerRegisterParams.module?.name} = ${replaceName}`
 
 
-                       const client = new ChannelWorkerClient<O, I>(accessibleModule +'\n'+ workerSourceCode);
+                        const client = new ChannelWorkerClient<O, I>(accessibleModule + '\n' + workerSourceCode);
 
-                       resolveFunc(client)
+                        resolveFunc(client)
 
-                   })
-               }else{
-                   return Promise.reject({
-                       status: moduleSource.status,
-                       statusText: moduleSource.statusText
-                   })
-               }
-            }).catch(err=>{
-     throw new Error(`Accessible Worker register error when fetching module:${JSON.stringify(workerRegisterParams.module)}|${JSON.stringify(err)}`)
+                    })
+                } else {
+                    return Promise.reject({
+                        status: moduleSource.status,
+                        statusText: moduleSource.statusText
+                    })
+                }
+            }).catch(err => {
+                throw new Error(`Accessible Worker register error when fetching module:${JSON.stringify(workerRegisterParams.module)}|${JSON.stringify(err)}`)
             })
             return p
         } else {
@@ -199,7 +204,12 @@ export class AccessibleWorkerFactory {
     public static registerFunctionSet<T extends FunctionSet>(funcSet: T, workerRegisterParams?: WorkerRegisterParams): Promise<Proxify<T>> {
         const functionRecord: Record<string, string> = {}
         for (const key of Object.keys(funcSet)) {
-            functionRecord[key] = funcSet[key].toString().replace(/[\d\w]+(?=.AccessibleWorkerModule)\./g, '')
+            let func = funcSet[key].toString()
+            if (workerRegisterParams && workerRegisterParams.module) {
+                const r = new RegExp(`[\\d\\w]+(?=.${workerRegisterParams.module.name})\\.`, 'g')
+                func = func.replace(r, '')
+            }
+            functionRecord[key] = func
         }
         const globalFunctions = buildGlobalFunctions(functionRecord)
         let functionalWorkerCode = buildFunctionalWorkerJs(globalFunctions)
@@ -224,7 +234,7 @@ export class AccessibleWorkerFactory {
                     }
                     const accessibleModule = source + '\n' + `var ${workerRegisterParams.module?.name} = ${replaceName}`
 
-                    const f = new FunctionSetWorkerProxyClient<T>(funcSet, accessibleModule +'\n'+ functionalWorkerCode)
+                    const f = new FunctionSetWorkerProxyClient<T>(funcSet, accessibleModule + '\n' + functionalWorkerCode)
                     resolveFunc(f as Proxify<T>)
 
                 })
