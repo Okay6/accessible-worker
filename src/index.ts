@@ -2,7 +2,6 @@ import {AccessibleWorker, GlobalVariable, SubscribeMessage} from "./decorator/wo
 import {MyOwnModule} from "./worker_module";
 import * as AWT from "./accessible_worker_type_infer";
 import {AccessibleWorkerFactory, ChannelWorkerDefinition} from "./experiment";
-import _ from "lodash";
 
 
 /******************************* Accessible Worker Demo **************************************/
@@ -94,7 +93,7 @@ const functionSet = {
     factorial: (num: number): number => new MyOwnModule.CalculateClass().factorial(num),
     getMsg: (): string => 'Accessible Worker &^<>^&',
     realUUID: () => MyOwnModule.uuid(),
-    endsWith: (str: string, suffix: string) => MyOwnModule.endWith(str,suffix)
+    endsWith: (str: string, suffix: string) => MyOwnModule.endWith(str, suffix)
 }
 // register Channel Worker
 const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyAccessibleWorker)
