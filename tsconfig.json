@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
         "target": "ES2015",
         "downlevelIteration": true,
         "experimentalDecorators": true,
