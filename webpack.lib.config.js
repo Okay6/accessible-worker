@@ -59,7 +59,7 @@ module.exports = {
                 },
                 {
                     from: path.join(__dirname, 'third_licenses'),
-                    to: './',
+                    to: './third_licenses',
                 }
             ]
         })

@@ -20,20 +20,20 @@
     - typescript:
         Project URL: https://github.com/Microsoft/TypeScript
         License: The Apache Software License, Version 2.0 https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt
-        (typescript.LICENSE)
+        (third_licenses/typescript.LICENSE)
     - hash-it:
        Project URL: https://github.com/planttheidea/hash-it
         License: The MIT License (MIT) https://github.com/planttheidea/hash-it/blob/master/LICENSE
-        (hash_it.LICENSE)
+        (third_licenses/hash_it.LICENSE)
     - reflect-metadata
         Project URL: https://github.com/rbuckton/reflect-metadata
         License: The Apache Software License, Version 2.0 https://github.com/rbuckton/reflect-metadata/blob/master/LICENSE
-        (reflect-metadata.LICENSE)
+        (third_licenses/reflect-metadata.LICENSE)
     - acorn
         Project URL: https://github.com/acornjs/acorn
         License: The MIT License (MIT) https://github.com/acornjs/acorn/blob/master/acorn/LICENSE
-         (acorn.LICENSE)
+         (third_licenses/acorn.LICENSE)
     - acorn-walk
         Project URL: https://github.com/acornjs/acorn
         License: The MIT License (MIT) https://github.com/acornjs/acorn/blob/master/acorn-walk/LICENSE
-         (acorn_walk.LICENSE)
+         (third_licenses/acorn_walk.LICENSE)
