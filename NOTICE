@@ -37,3 +37,7 @@
         Project URL: https://github.com/acornjs/acorn
         License: The MIT License (MIT) https://github.com/acornjs/acorn/blob/master/acorn-walk/LICENSE
          (third_licenses/acorn_walk.LICENSE)
+    - js-beautify
+         Project URL: https://github.com/beautify-web/js-beautify
+         License: The MIT License (MIT) https://github.com/beautify-web/js-beautify/blob/main/LICENSE
+          (third_licenses/js-beautify.LICENSE)
