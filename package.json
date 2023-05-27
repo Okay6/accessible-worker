@@ -13,23 +13,22 @@
     "cy:run": "env NODE_ENV=development cypress run",
     "cy:i": "env NODE_ENV=development cypress install",
     "cover": "env TS_NODE_PROJECT=tsconfig.test.json nyc --reporter=html --report-dir=./coverage_unit mocha",
-    "build:esm": "tsc -p tsconfig.lib.json  -m es6 --declarationDir ./output/typings --outDir output/esm",
-    "build:extract-api": "api-extractor run && shx rm -rf output/typings",
+    "build:esm": "tsc -p tsconfig.lib.json  -m es6 --declarationDir ./output/typings --outDir output/esm && npm run copy-js",
+    "copy-js": "shx cp ./lib/decorator/beautify.min.js ./output/esm/decorator/ && npm run copy-extra-declare",
+    "copy-extra-declare": "shx cp ./lib/decorator/beautify.min.d.ts ./output/esm/decorator/",
+    "build:extract-api": "api-extractor run & rimraf ./output/typings",
     "build:extract-api-local": "shx mkdir -p ./etc && npm run build:esm && api-extractor run -l"
   },
   "author": "HongXiang Li",
   "license": "Apache-2.0",
-  "main": "dist/walk.js",
-  "types": "dist/walk.d.ts",
-  "module": "dist/walk.mjs",
+  "types": "index.d.ts",
   "exports": {
     ".": [
       {
-        "import": "./dist/walk.mjs",
-        "require": "./dist/walk.js",
-        "default": "./dist/walk.js"
+        "import": "./index.js",
+        "default": "./index.js"
       },
-      "./dist/walk.js"
+      "./index.js"
     ],
     "./package.json": "./package.json"
   },
@@ -38,14 +37,13 @@
   },
   "maintainers": [
     {
-      "name": "Marijn Haverbeke",
-      "email": "marijnh@gmail.com",
-      "web": "https://marijnhaverbeke.nl"
+      "name": "HongXiang li",
+      "email": "email@contactme@163.com"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/acornjs/acorn.git"
+    "url": "https://gitee.com/fsc_dev/web_worker_research.git"
   },
   "devDependencies": {
     "@babel/plugin-proposal-decorators": "^7.21.0",
@@ -72,6 +70,7 @@
     "lodash": "^4.17.21",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
+    "rimraf": "^5.0.1",
     "shx": "^0.3.4",
     "source-map-support": "^0.5.21",
     "terser-webpack-plugin": "^5.3.9",
