@@ -2,10 +2,10 @@ const path = require('path');
 const webpack = require('webpack');
 const babelConfig = require('./babel.config');
 const TerserPlugin = require("terser-webpack-plugin");
-const {  author  } = require('./package');
+const {author} = require('./package');
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const fs = require("fs")
-let NOTICE = fs.readFileSync('NOTICE',"utf8");
+let NOTICE = fs.readFileSync('NOTICE', "utf8");
 
 module.exports = {
     entry: "./src/lib.ts",
@@ -50,13 +50,18 @@ module.exports = {
     plugins: [
         new CopyWebpackPlugin({
             patterns: [{
-                from: path.join(__dirname,'LICENSE'),
+                from: path.join(__dirname, 'LICENSE'),
                 to: './',
             },
                 {
-                    from: path.join(__dirname,'NOTICE'),
+                    from: path.join(__dirname, 'NOTICE'),
                     to: './',
-                }]
+                },
+                {
+                    from: path.join(__dirname, 'third_licenses'),
+                    to: './',
+                }
+            ]
         })
     ],
     output: {
