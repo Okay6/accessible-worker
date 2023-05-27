@@ -12,10 +12,41 @@
     "cy:open": "env NODE_ENV=development cypress open",
     "cy:run": "env NODE_ENV=development cypress run",
     "cy:i": "env NODE_ENV=development cypress install",
-    "cover": "env TS_NODE_PROJECT=tsconfig.test.json nyc --reporter=html --report-dir=./coverage_unit mocha"
+    "cover": "env TS_NODE_PROJECT=tsconfig.test.json nyc --reporter=html --report-dir=./coverage_unit mocha",
+    "build:esm": "tsc -p tsconfig.lib.json  -m es6 --declarationDir ./output/typings --outDir output/esm",
+    "build:extract-api": "api-extractor run && shx rm -rf output/typings",
+    "build:extract-api-local": "shx mkdir -p ./etc && npm run build:esm && api-extractor run -l"
   },
   "author": "HongXiang Li",
   "license": "Apache-2.0",
+  "main": "dist/walk.js",
+  "types": "dist/walk.d.ts",
+  "module": "dist/walk.mjs",
+  "exports": {
+    ".": [
+      {
+        "import": "./dist/walk.mjs",
+        "require": "./dist/walk.js",
+        "default": "./dist/walk.js"
+      },
+      "./dist/walk.js"
+    ],
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "maintainers": [
+    {
+      "name": "Marijn Haverbeke",
+      "email": "marijnh@gmail.com",
+      "web": "https://marijnhaverbeke.nl"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/acornjs/acorn.git"
+  },
   "devDependencies": {
     "@babel/plugin-proposal-decorators": "^7.21.0",
     "@babel/plugin-syntax-decorators": "^7.21.0",
@@ -23,6 +54,7 @@
     "@cypress/code-coverage": "~3.10.6",
     "@cypress/webpack-preprocessor": "^5.17.1",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@microsoft/api-extractor": "^7.35.0",
     "@types/chai": "^4.3.5",
     "@types/lodash": "^4.14.195",
     "@types/mocha": "^10.0.1",
@@ -40,6 +72,7 @@
     "lodash": "^4.17.21",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
+    "shx": "^0.3.4",
     "source-map-support": "^0.5.21",
     "terser-webpack-plugin": "^5.3.9",
     "ts-loader": "^9.4.2",

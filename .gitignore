@@ -8,3 +8,6 @@ cypress/downloads
 cypress/screenshots
 cypress/videos
 *.d.ts
+output
+temp
+etc

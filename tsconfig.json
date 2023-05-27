@@ -6,7 +6,6 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "noEmitHelpers": false,
-        "declaration": true,
         "noImplicitAny": true,
         "lib": [
             "esnext",
@@ -28,7 +27,7 @@
         "noEmit": false,
         "types": ["cypress", "node","mocha","chai"]
     },
-    "include": ["src/**/*", "typings/**/*.ts",
+    "include": ["lib/**/*", "typings/**/*.ts",
         "cypress/**/*.ts","test"
     ],
     "exclude": ["node_modules/**"],

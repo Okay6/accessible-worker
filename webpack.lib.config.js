@@ -8,7 +8,7 @@ const fs = require("fs")
 let NOTICE_COMMENT = fs.readFileSync('NOTICE_COMMENT', "utf8");
 
 module.exports = {
-    entry: "./src/lib.ts",
+    entry: "./lib/index.ts",
     resolve: {
         extensions: [".ts", ".js"],
     },
@@ -66,7 +66,7 @@ module.exports = {
     ],
     output: {
         filename: "index.js",
-        path: path.resolve(__dirname, 'dist/umd'),
+        path: path.resolve(__dirname, 'output/umd'),
         library: {
             type: 'umd',
             name: {
@@ -76,5 +76,6 @@ module.exports = {
             },
         },
     },
+    devtool: 'source-map',
     mode: "production",
 }
