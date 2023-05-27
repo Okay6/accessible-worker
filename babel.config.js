@@ -1,12 +1,14 @@
-const {CODE_COVERAGE} = process.env;
+const {NODE_ENV} = process.env;
 
-const plugins = [['@babel/plugin-proposal-decorators', { legacy: true }], ["istanbul", {
-    "exclude": [
-        "**/*.spec.ts",
-        "**/index.ts"
-    ]
-}]]
-
+const plugins = [['@babel/plugin-proposal-decorators', { legacy: true }]]
+if(NODE_ENV === 'development'){
+    plugins.push(["istanbul", {
+        "exclude": [
+            "**/*.spec.ts",
+            "**/index.ts"
+        ]
+    }])
+}
 
 module.exports = {
     presets: [

@@ -7,3 +7,4 @@ coverage_unit
 cypress/downloads
 cypress/screenshots
 cypress/videos
+*.d.ts

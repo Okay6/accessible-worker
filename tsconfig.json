@@ -6,6 +6,8 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "noEmitHelpers": false,
+        "declaration": true,
+        "noImplicitAny": true,
         "lib": [
             "esnext",
             "es5",

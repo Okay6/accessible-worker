@@ -3,6 +3,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const babelConfig = require('./babel.config');
 const HookShellScriptPlugin = require('hook-shell-script-webpack-plugin');
+const TerserPlugin = require("terser-webpack-plugin");
+
 module.exports = {
     entry: {
         "main": "./src/index.ts",
