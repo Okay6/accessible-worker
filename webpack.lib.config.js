@@ -2,19 +2,10 @@ const path = require('path');
 const webpack = require('webpack');
 const babelConfig = require('./babel.config');
 const TerserPlugin = require("terser-webpack-plugin");
-const { name, version, author, homepage, description } = require('./package');
-const nunjucks = require('nunjucks');
-const moment = require('moment');
-
-// 使用模板渲染
-const LICENSE = nunjucks.render('LICENSE', {
-    name: name,
-    version: version,
-    description: description,
-    author: author,
-    homepage: homepage,
-    date: moment().format('YYYY-MM-DD HH:mm:ss'),
-});
+const {  author  } = require('./package');
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const fs = require("fs")
+let NOTICE = fs.readFileSync('NOTICE',"utf8");
 
 module.exports = {
     entry: "./src/lib.ts",
@@ -44,18 +35,30 @@ module.exports = {
             new TerserPlugin({
                 terserOptions: {
                     format: {
-                        comments: RegExp(`${name}`),
+                        comments: RegExp(`${author}`),
                     },
                 },
                 extractComments: false,//不将注释提取到单独的文件中
             }),
             new webpack.BannerPlugin({
                 entryOnly: true,
-                banner: LICENSE,
+                banner: NOTICE,
                 raw: true,
             }),
         ],
     },
+    plugins: [
+        new CopyWebpackPlugin({
+            patterns: [{
+                from: path.join(__dirname,'LICENSE'),
+                to: './',
+            },
+                {
+                    from: path.join(__dirname,'NOTICE'),
+                    to: './',
+                }]
+        })
+    ],
     output: {
         filename: "index.js",
         path: path.resolve(__dirname, 'dist/umd'),
