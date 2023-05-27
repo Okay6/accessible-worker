@@ -1,0 +1,35 @@
+/**
+  *  Copyright 2023 HongXiang Li
+  *
+  *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+  *
+  *        http://www.apache.org/licenses/LICENSE-2.0
+  *
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an "AS IS" BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  *  ------------------------------------------------------------------------
+  *  Accessible Worker includes a number of libraries with separate
+  *  copyright notices and license terms. Your use of those libraries are
+  *  subject to the terms and conditions of the following licenses:
+  *
+  *  - typescript:
+  *      Project URL: https://github.com/Microsoft/TypeScript
+  *      License: The Apache Software License, Version 2.0 https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt (typescript.LICENSE)
+  *  - hash-it:
+  *      Project URL: https://github.com/planttheidea/hash-it
+  *      License: The MIT License (MIT) https://github.com/planttheidea/hash-it/blob/master/LICENSE (hash_it.LICENSE)
+  *  - reflect-metadata
+  *      Project URL: https://github.com/rbuckton/reflect-metadata
+  *      License: The Apache Software License, Version 2.0 https://github.com/rbuckton/reflect-metadata/blob/master/LICENSE (reflect-metadata.LICENSE)
+  *  - acorn
+  *      Project URL: https://github.com/acornjs/acorn
+  *      License: The MIT License (MIT) https://github.com/acornjs/acorn/blob/master/acorn/LICENSE (acorn.LICENSE)
+  *  - acorn-walk
+  *      Project URL: https://github.com/acornjs/acorn
+  *      License: The MIT License (MIT) https://github.com/acornjs/acorn/blob/master/acorn-walk/LICENSE (acorn_walk.LICENSE)
+  */

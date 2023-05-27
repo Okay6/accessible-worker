@@ -5,7 +5,7 @@ const TerserPlugin = require("terser-webpack-plugin");
 const {author} = require('./package');
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const fs = require("fs")
-let NOTICE = fs.readFileSync('NOTICE', "utf8");
+let NOTICE_COMMENT = fs.readFileSync('NOTICE_COMMENT', "utf8");
 
 module.exports = {
     entry: "./src/lib.ts",
@@ -42,7 +42,7 @@ module.exports = {
             }),
             new webpack.BannerPlugin({
                 entryOnly: true,
-                banner: NOTICE,
+                banner: NOTICE_COMMENT,
                 raw: true,
             }),
         ],
