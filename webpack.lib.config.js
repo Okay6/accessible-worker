@@ -66,14 +66,40 @@ module.exports = {
     ],
     output: {
         filename: "index.js",
-        path: path.resolve(__dirname, 'output/umd'),
+        path: path.resolve(__dirname, 'output'),
         library: {
             type: 'umd',
             name: {
-                amd: '@accessible_worker',
-                commonjs: '@accessible_worker',
-                root: '@accessible_worker',
+                amd: 'accessible-worker',
+                commonjs: 'accessible-worker',
+                root: 'accessible_worker',
             },
+        },
+    },
+    externals: {
+        acorn: {
+            root: 'acorn',
+            commonjs: 'acorn',
+            commonjs2: 'acorn',
+            amd: 'acorn',
+        },
+        'acorn-walk': {
+            root: 'acorn-walk',
+            commonjs: 'acorn-walk',
+            commonjs2: 'acorn-walk',
+            amd: 'acorn-walk',
+        },
+        'hash-it': {
+            root: 'hash-it',
+            commonjs: 'hash-it',
+            commonjs2: 'hash-it',
+            amd: 'hash-it',
+        },
+        'reflect-metadata': {
+            root: 'reflect-metadata',
+            commonjs: 'reflect-metadata',
+            commonjs2: 'reflect-metadata',
+            amd: 'reflect-metadata',
         },
     },
     devtool: 'source-map',

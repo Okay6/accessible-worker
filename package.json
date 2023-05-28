@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "build:umd": "webpack -c webpack.lib.config.js --node-env production --env NODE_ENV=production",
-    "build": "webpack --config webpack.config.js && webpack  --config webpack.aw.config.js",
+    "build": "rimraf output && webpack -c webpack.lib.config.js --node-env production --env NODE_ENV=production && npm run extract-declare",
     "dev": "env NODE_ENV=development webpack-dev-server --config webpack.config.js",
     "awm": "webpack --config webpack.aw.config.js",
     "serve": "http-server dist -a 0.0.0.0 -p 9090",
@@ -13,10 +12,8 @@
     "cy:run": "env NODE_ENV=development cypress run",
     "cy:i": "env NODE_ENV=development cypress install",
     "cover": "env TS_NODE_PROJECT=tsconfig.test.json nyc --reporter=html --report-dir=./coverage_unit mocha",
-    "build:esm": "rimraf output/esm && tsc -p tsconfig.lib.json  -m es6 --declarationDir ./output/typings --outDir output/esm && npm run copy-js && npm run build:extract-api",
-    "copy-js": "shx cp ./lib/decorator/beautify.min.js ./output/esm/decorator/ && npm run copy-extra-declare",
-    "copy-extra-declare": "shx cp ./lib/decorator/beautify.min.d.ts ./output/esm/decorator/ && npm run copy-packagefile",
-    "copy-packagefile": "shx cp ./package.lib.json ./output/esm/package.json",
+    "extract-declare": "tsc -p tsconfig.lib.json  --removeComments  -m es6 --declarationDir ./output/typings --outDir output/typings/source &&  npm run copy-packagefile && npm run build:extract-api",
+    "copy-packagefile": "shx cp ./package.lib.json ./output/package.json",
     "build:extract-api": "api-extractor run & rimraf ./output/typings",
     "build:extract-api-local": "shx mkdir -p ./etc && npm run build:esm && api-extractor run -l"
   },
@@ -88,6 +85,6 @@
     "acorn-walk": "^8.2.0",
     "hash-it": "^6.0.0",
     "reflect-metadata": "^0.1.13",
-    "accessible-worker": "file:./output/esm"
+    "accessible-worker": "file:./output"
   }
 }
