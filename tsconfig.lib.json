@@ -27,6 +27,6 @@
     "resolveJsonModule": true,
     "noEmit": false,
   },
-  "include": ["lib/index.ts", "lib/index.d.ts",],
-  "exclude": ["node_modules/**"],
+  "include": ["lib/**/*.ts"],
+  "exclude": ["node_modules/**","project/**/*.ts"],
 }

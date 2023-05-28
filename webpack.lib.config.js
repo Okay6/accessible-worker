@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const babelConfig = require('./babel.config');
 const TerserPlugin = require("terser-webpack-plugin");
 const {author} = require('./package');
 const CopyWebpackPlugin = require('copy-webpack-plugin')
@@ -18,11 +17,8 @@ module.exports = {
                 test: /\.(ts|tsx)$/,
                 use: [
                     {
-                        loader: 'babel-loader',
-                        options: {...babelConfig},
-                    },
-                    {
                         loader: "ts-loader",
+                        options: {configFile:"tsconfig.lib.json"}
                     }
                 ],
             },
