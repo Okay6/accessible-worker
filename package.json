@@ -15,7 +15,8 @@
     "extract-declare": "tsc -p tsconfig.lib.json  --removeComments  -m es6 --declarationDir ./output/typings --outDir output/typings/source &&  npm run copy-packagefile && npm run build:extract-api",
     "copy-packagefile": "shx cp ./package.lib.json ./output/package.json",
     "build:extract-api": "api-extractor run & rimraf ./output/typings",
-    "build:extract-api-local": "shx mkdir -p ./etc && npm run build:esm && api-extractor run -l"
+    "build:extract-api-local": "shx mkdir -p ./etc && npm run build:esm && api-extractor run -l",
+    "doc": "typedoc --options ./typedoc.json"
   },
   "author": "HongXiang Li",
   "license": "Apache-2.0",
@@ -81,10 +82,11 @@
     "webpack-dev-server": "^4.15.0"
   },
   "dependencies": {
+    "accessible-worker": "file:./output",
     "acorn": "^8.8.2",
     "acorn-walk": "^8.2.0",
     "hash-it": "^6.0.0",
     "reflect-metadata": "^0.1.13",
-    "accessible-worker": "file:./output"
+    "typedoc": "^0.24.7"
   }
 }
