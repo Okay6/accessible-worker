@@ -30,7 +30,7 @@ export type EventsMap = {
  * is equivalent to accepting all event names, and any data.
  */
 export interface DefaultEventsMap {
-    [key: string]: Func
+    [key: string]: PureFunction
 }
 
 /**
@@ -66,18 +66,18 @@ export type PromiseWrapper<Value> =
     Value extends Promise<any> ? Value : Promise<Value>;
 
 
-export type wrap<C, D extends Array<any>> = (...arg: D) => C extends Func ? PromiseWrapper<ReturnType<C>> : never
+export type WrapToPromise<C, D extends Array<any>> = (...arg: D) => C extends PureFunction ? PromiseWrapper<ReturnType<C>> : never
 
 
-export type Proxify<T> = {
-    [P in keyof T]: wrap<T[P], T[P] extends Func ? Parameters<T[P]> : []>;
+export type Proxify<T extends FunctionSet> = {
+    [P in keyof T]: WrapToPromise<T[P], T[P] extends PureFunction ? Parameters<T[P]> : []>;
 };
 
 
-export type Func = (...args: never[]) => never | void
+export type PureFunction = (...args: never[]) => never | void
 
 export  type  FunctionSet = {
-    [key: string | symbol]: Func
+    [key: string | symbol]: PureFunction
 }
 export type InferParams<E extends EventsMap, K extends keyof EventsMap> =
     Parameters<E[K]> extends Array<any> ? Parameters<E[K]>[0] : never
@@ -155,7 +155,7 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
         }
     }
 
-    private eventHandlerRecord: Record<string | symbol, Func> = {}
+    private eventHandlerRecord: Record<string | symbol, PureFunction> = {}
 
     on<Ev extends UserEventNames<I>>(ev: Ev, listener: UserListener<I, Ev>): void {
         this.eventHandlerRecord[ev] = listener

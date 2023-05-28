@@ -3,9 +3,9 @@ export {
     IChannelWorkerClient,
     FunctionSet,
     ChannelWorkerDefinition,
-    Func,
+    PureFunction,
     Proxify,
-    wrap,
+    WrapToPromise,
     InferParams,
     PromiseWrapper,
     EventsMap
