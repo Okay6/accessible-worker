@@ -1,5 +1,5 @@
 {
-  "name": "web_worker_research",
+  "name": "accessible-worker",
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
@@ -13,9 +13,10 @@
     "cy:run": "env NODE_ENV=development cypress run",
     "cy:i": "env NODE_ENV=development cypress install",
     "cover": "env TS_NODE_PROJECT=tsconfig.test.json nyc --reporter=html --report-dir=./coverage_unit mocha",
-    "build:esm": "tsc -p tsconfig.lib.json  -m es6 --declarationDir ./output/typings --outDir output/esm && npm run copy-js",
+    "build:esm": "rimraf output/esm && tsc -p tsconfig.lib.json  -m es6 --declarationDir ./output/typings --outDir output/esm && npm run copy-js && npm run build:extract-api",
     "copy-js": "shx cp ./lib/decorator/beautify.min.js ./output/esm/decorator/ && npm run copy-extra-declare",
-    "copy-extra-declare": "shx cp ./lib/decorator/beautify.min.d.ts ./output/esm/decorator/",
+    "copy-extra-declare": "shx cp ./lib/decorator/beautify.min.d.ts ./output/esm/decorator/ && npm run copy-packagefile",
+    "copy-packagefile": "shx cp ./package.lib.json ./output/esm/package.json",
     "build:extract-api": "api-extractor run & rimraf ./output/typings",
     "build:extract-api-local": "shx mkdir -p ./etc && npm run build:esm && api-extractor run -l"
   },
@@ -86,6 +87,7 @@
     "acorn": "^8.8.2",
     "acorn-walk": "^8.2.0",
     "hash-it": "^6.0.0",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.1.13",
+    "accessible-worker": "file:./output/esm"
   }
 }

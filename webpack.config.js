@@ -7,11 +7,11 @@ const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
     entry: {
-        "main": "./lib/html.ts",
+        "main": "./project/index.ts",
     },
     plugins: [
         new HtmlWebpackPlugin({
-           template:'./lib/index.html'
+           template:'./project/index.html'
         }),
         new HookShellScriptPlugin({
             afterEmit: ['npm run awm']

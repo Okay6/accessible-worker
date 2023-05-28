@@ -27,7 +27,7 @@
         "noEmit": false,
         "types": ["cypress", "node","mocha","chai"]
     },
-    "include": ["lib/**/*", "typings/**/*.ts",
+    "include": ["lib/**/*", "typings/**/*.ts","project/**/*",
         "cypress/**/*.ts","test"
     ],
     "exclude": ["node_modules/**"],

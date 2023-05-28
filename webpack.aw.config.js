@@ -2,7 +2,7 @@ const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
     entry: {
-        "accessible_worker_module": "./lib/worker_module.ts",
+        "accessible_worker_module": "./project/worker_module.ts",
     },
     experiments: {
         outputModule: true,

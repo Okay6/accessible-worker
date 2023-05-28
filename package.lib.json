@@ -1,0 +1,39 @@
+{
+  "name": "accessible-worker",
+  "version": "0.0.1",
+  "description": "Make web worker more accessible",
+  "main": "index.js",
+  "author": "HongXiang Li",
+  "license": "Apache-2.0",
+  "types": "index.d.ts",
+  "keywords": ["web-worker", "typescript"],
+  "exports": {
+    ".": [
+      {
+        "import": "./index.js",
+        "default": "./index.js"
+      },
+      "./index.js"
+    ],
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "maintainers": [
+    {
+      "name": "HongXiang li",
+      "email": "email@contactme@163.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/fsc_dev/web_worker_research.git"
+  },
+  "dependencies": {
+    "acorn": "^8.8.2",
+    "acorn-walk": "^8.2.0",
+    "hash-it": "^6.0.0",
+    "reflect-metadata": "^0.1.13"
+  }
+}

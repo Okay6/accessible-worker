@@ -5,7 +5,7 @@ if(NODE_ENV === 'development'){
     plugins.push(["istanbul", {
         "exclude": [
             "**/*.spec.ts",
-            "**/html.ts"
+            "**/index.ts"
         ]
     }])
 }
