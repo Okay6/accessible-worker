@@ -1,7 +1,7 @@
 {
   "name": "accessible-worker",
   "version": "0.0.1",
-  "description": "",
+  "description": "Make web worker more accessible",
   "main": "index.ts",
   "scripts": {
     "build": "rimraf output && webpack -c webpack.lib.config.js --node-env production --env NODE_ENV=production && npm run extract-declare",
@@ -12,7 +12,7 @@
     "cy:run": "env NODE_ENV=development cypress run",
     "cy:i": "env NODE_ENV=development cypress install",
     "cover": "env TS_NODE_PROJECT=tsconfig.test.json nyc --reporter=html --report-dir=./coverage_unit mocha",
-    "extract-declare": "tsc -p tsconfig.lib.json  --removeComments  -m es6 --declarationDir ./output/typings --outDir output/typings/source &&  npm run copy-packagefile && npm run build:extract-api",
+    "extract-declare": "tsc -p tsconfig.lib.json  --removeComments  -m es6 --declarationDir ./typings --outDir ./typings/source &&  npm run copy-packagefile && npm run build:extract-api",
     "copy-packagefile": "shx cp ./package.lib.json ./output/package.json",
     "build:extract-api": "api-extractor run",
     "build:api": "rimraf etc && rimraf temp && shx mkdir -p ./etc && npm run build && npm run build:extract-api && api-extractor run -l",
