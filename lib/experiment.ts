@@ -185,6 +185,8 @@ export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap,
 
 /*****************************************************************************/
 export class AccessibleWorkerFactory {
+    private constructor() {
+    }
     /**
      * 根据ChannelWorkerDefinition构造Worker
      * @param _t
