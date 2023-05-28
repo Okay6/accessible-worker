@@ -8,11 +8,14 @@ export {
     WrapToPromise,
     InferParams,
     PromiseWrapper,
-    EventsMap
+    EventsMap,
+    UserListener,
 } from "./experiment"
 export {
     SubscribeMessage,
     GlobalVariable,
     AccessibleWorker,
-    WorkerRegisterParams
+    WorkerRegisterParams,
+    ConstructorType,
+    ValueMatchedKey
 } from "./decorator/worker_definition"

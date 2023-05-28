@@ -34,7 +34,7 @@ export interface WorkerDefinition {
 }
 
 // regard as specific T constructor
-type Type<T> = new (...args: any[]) => T;
+export type ConstructorType<T> = new (...args: any[]) => T;
 
 export interface IdentifierNode {
     type: 'Identifier';
@@ -86,7 +86,7 @@ export interface Expression {
     }
 }
 
-type ValueMatchedKey<Type, Value> = {
+export type ValueMatchedKey<Type, Value> = {
     [Key in keyof Type]: Type[Key] extends Value ? Key : never;
 }[keyof Type];
 
@@ -94,7 +94,7 @@ type ValueMatchedKey<Type, Value> = {
 /*******************************************************/
 export const AccessibleWorker = (workerRegisterParams?: WorkerRegisterParams) => {
 
-    return (target: Type<ChannelWorkerDefinition<EventsMap, EventsMap>>) => {
+    return (target: ConstructorType<ChannelWorkerDefinition<EventsMap, EventsMap>>) => {
 
         if (workerRegisterParams) {
             Reflect.defineMetadata(WORKER_REGISTER_PARAMS, workerRegisterParams, target)
