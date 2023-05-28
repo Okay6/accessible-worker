@@ -28,7 +28,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://gitee.com/fsc_dev/web_worker_research.git"
+    "url": "https://gitee.com/fsc_dev/accessible-worker.git"
   },
   "dependencies": {
     "acorn": "^8.8.2",
