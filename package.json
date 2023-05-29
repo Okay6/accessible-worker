@@ -44,7 +44,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://gitee.com/fsc_dev/accessible-worker.git"
+    "url": "https://github.com/Okay6/accessible-worker"
   },
   "devDependencies": {
     "@babel/plugin-proposal-decorators": "^7.21.0",
