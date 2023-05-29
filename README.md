@@ -5,7 +5,7 @@ accessible-worker aim to make web worker more accessible in TypeScipt and meet o
 
 ## Demo
 
-- A demo is provied, [accessible-worker-demo  ](https://github.com/Okay6/accessible-worker-demo)  /  [online with codesandbox](https://codesandbox.io/p/github/Okay6/accessible-worker-demo)
+- A demo is provided, [accessible-worker-demo  ](https://github.com/Okay6/accessible-worker-demo)  /  [online with codesandbox](https://codesandbox.io/p/github/Okay6/accessible-worker-demo)
 
 ## Getting Started
 
