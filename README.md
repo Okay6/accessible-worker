@@ -3,6 +3,10 @@
 
 accessible-worker aim to make web worker more accessible in TypeScipt and meet oop(Object Oriented Programing) style
 
+## Demo
+
+- A demo is provied, [accessible-worker-demo  ](https://github.com/Okay6/accessible-worker-demo)  /  [online with codesandbox](https://codesandbox.io/p/github/Okay6/accessible-worker-demo)
+
 ## Getting Started
 
 1. Install, ```npm install accessible-worker -s``` or ```  yarn add accessible-worker```
