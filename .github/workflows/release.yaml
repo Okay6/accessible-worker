@@ -7,14 +7,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: install
-        run: npm install
-      - name: build
-        run: npm run build
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: https://registry.npmjs.org/
+      - name: install-build
+        run: |
+           npm install
+           npm run build
   publish:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 16
