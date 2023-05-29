@@ -13,3 +13,9 @@ Web Storm Theme = Material Darker
 
 Apache license 2.0
 https://codeleading.com/article/12614170127/
+
+
+
+npm config set registry https://registry.npmjs.org/
+
+npm deprecate <pkg>[@<version>] <message>
