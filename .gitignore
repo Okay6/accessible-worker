@@ -10,6 +10,5 @@ cypress/videos
 *.d.ts
 output
 temp
-etc
 markdown
 typings
