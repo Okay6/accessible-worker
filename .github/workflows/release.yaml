@@ -1,0 +1,24 @@
+name: release-npm-package
+on:
+  release:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name:
+        run: |
+          npm install
+          npm run build
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: https://registry.npmjs.org/
+      - run: npm publish ./output
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH}}
