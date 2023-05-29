@@ -1,16 +1,16 @@
 name: release-npm-package
 on:
   release:
-    branches:
-      - master
+    types:
+      [created]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name:
-        run: |
-          npm install
-          npm run build
+      - name: install
+        run: npm install
+      - name: build
+        run: npm run build
   publish:
     needs: build
     runs-on: ubuntu-latest
