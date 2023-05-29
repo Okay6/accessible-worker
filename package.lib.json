@@ -1,12 +1,12 @@
 {
   "name": "accessible-worker",
-  "version": "0.0.1-dev",
+  "version": "0.0.1-dev-1",
   "description": "Make web worker more accessible",
   "main": "index.js",
   "author": "HongXiang Li",
   "license": "Apache-2.0",
   "types": "index.d.ts",
-  "keywords": ["web-worker", "typescript"],
+  "keywords": ["web-worker", "typescript","async","asynchronous","promise"],
   "exports": {
     ".": [
       {
