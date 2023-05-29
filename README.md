@@ -1,4 +1,5 @@
 # Accessible Worker （experimental ）
+[![npm version](https://badge.fury.io/js/accessible-worker.svg)](https://www.npmjs.com/package/accessible-worker)
 
 accessible-worker aim to make web worker more accessible in TypeScipt and meet oop(Object Oriented Programing) style
 
