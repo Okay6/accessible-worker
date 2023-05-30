@@ -44,3 +44,11 @@ trial	试用版本	本软件通常都有时间限制，过期之后用户如果�
 stable	稳定版
 csp	内容安全版本	js库常用
 latest	最新版本	不指定版本和标签，npm 默认安最新版
+
+
+http://www.voycn.com/index.php/article/git-commit-changelog-hebanbenfabudebiaozhunzidonghua
+
+
+
+
+

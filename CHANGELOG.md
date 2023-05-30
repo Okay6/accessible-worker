@@ -1,3 +1,8 @@
+## <small>0.0.1-dev-8 (2023-05-30)</small>
+* docs(readme.md): add todo list and changelog link ([96ba60e](https://github.com/Okay6/accessible-worker/commit/96ba60e))
+* docs(update docs): update docs, fix empty link error ([7d761bb](https://github.com/Okay6/accessible-worker/commit/7d761bb))
+
+
 ## <small>0.0.1-dev-7 (2023-05-30)</small>
 * docs(changelog.md): update changelog on 0.0.1-dev4 ([5ea10de](https://github.com/Okay6/accessible-worker/commit/5ea10de))
 * docs(update docs): update docs for github pages ([266120e](https://github.com/Okay6/accessible-worker/commit/266120e))
