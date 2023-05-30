@@ -3,6 +3,17 @@
 
 accessible-worker aim to make web worker more accessible in TypeScipt and meet oop(Object Oriented Programing) style
 
+## What it does?
+
+- Use TypeScript decorator & acorn compile class into web worker source code.
+
+| Accessible Worker Define                                     | Compiled   Web Worker Souce Codes                            |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+|  ![channel-worker](./images/channel-worker.png)| ![compiled-channel-worker](./images/compiled-channel-worker.png) |
+|  ![functional-worker](./images/functional-worker.png) | ![compiled-functional-worker](./images/compiled-functional-worker.png)|
+
+
+
 ## Demo
 
 - A demo is provided, [accessible-worker-demo  ](https://github.com/Okay6/accessible-worker-demo)  /  [online with codesandbox](https://codesandbox.io/p/github/Okay6/accessible-worker-demo)
@@ -28,7 +39,7 @@ accessible-worker aim to make web worker more accessible in TypeScipt and meet o
 
 ## Channel   Worker 
 
-- Channel Wokrer is designed as Sever-Client style based on event communication
+- Channel Worker is designed as Sever-Client style based on event communication
 
 - Define Server I/O events like this:
 
@@ -47,7 +58,7 @@ accessible-worker aim to make web worker more accessible in TypeScipt and meet o
 
   
 
-- Implement your own Channel Woker  ***extends*** ```ChannelWorkerDefinition``` like this:
+- Implement your own Channel Worker  ***extends*** ```ChannelWorkerDefinition``` like this:
 
   ```typescript
   // Define Accessible Worker Description Class
@@ -88,14 +99,14 @@ accessible-worker aim to make web worker more accessible in TypeScipt and meet o
   }
   ```
 
-- Register your own Channel Woker with ```AccessibleWorkerFactory```:
+- Register your own Channel Worker with ```AccessibleWorkerFactory```:
 
   ```typescript
    // register Channel Worker
    const channelWorkerClient = await AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyAccessibleWorker)
   ```
 
-- Now, you can your own Channel Woker:
+- Now, you can use your own Channel Worker:
 
   ```typescript
    channelWorkerClient.on('COMBINED_MESSAGE', (msg: string) => {

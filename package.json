@@ -1,6 +1,6 @@
 {
   "name": "accessible-worker",
-  "version": "0.0.1-dev-5",
+  "version": "0.0.1-dev-6",
   "description": "Make web worker more accessible",
   "main": "index.ts",
   "scripts": {
