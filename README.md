@@ -1,5 +1,5 @@
 # Accessible Worker （experimental ）
-[![npm version](https://img.shields.io/npm/v/accessible-worker?color=33cd56&logo=npm)](https://www.npmjs.com/package/accessible-worker) ![npm-downloads](https://img.shields.io/npm/dw/accessible-worker) ![License](https://img.shields.io/npm/l/accessible-worker) ![GitHub Repo stars](https://img.shields.io/github/stars/okay6/accessible-worker)
+[![npm version](https://img.shields.io/npm/v/accessible-worker?color=33cd56&logo=npm)](https://www.npmjs.com/package/accessible-worker) [![npm-downloads](https://img.shields.io/npm/dw/accessible-worker)](https://www.npmjs.com/package/accessible-worker) [![License](https://img.shields.io/npm/l/accessible-worker)](https://github.com/Okay6/accessible-worker/blob/master/LICENSE) [![GitHub Repo stars](https://img.shields.io/github/stars/okay6/accessible-worker)](https://github.com/Okay6/accessible-worker)
 
 accessible-worker aim to make web worker more accessible in TypeScipt and meet oop(Object Oriented Programing) style
 
