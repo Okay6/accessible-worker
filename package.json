@@ -16,7 +16,7 @@
     "copy-assets": "shx cp ./package.lib.json ./output/package.json && shx cp ./README.md ./output/README.md",
     "build:extract-api": "rimraf temp && shx mkdir -p ./etc && api-extractor run -l",
     "build:api": "npm run build && npm run build:extract-api && api-extractor run -l",
-    "doc": "typedoc --options ./typedoc.json",
+    "doc": "typedoc --options ./typedoc.json && shx cp -r ./images ./docs",
     "rm-lib": "rimraf node_modules/accessible-worker",
     "markdown": "rimraf markdown && api-documenter markdown  -i temp  -o markdown",
     "install-lib": "shx cp -r ./output ./node_modules/accessible-worker"
