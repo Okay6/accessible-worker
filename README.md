@@ -314,7 +314,13 @@ accessible-worker aim to make web worker more accessible in TypeScipt and meet o
 
 ## **!!! So far, accessible-worker  is  experimental and only tested on webpack5**
 
+## Todo
 
+- [ ] Complete codes comments
+- [ ] Complete API  docs
+- [ ] Support expection catch in web web worker
+
+## [ChangeLog](https://github.com/okay6/accessible-worker/blob/master/CHANGELOG.md)
 
 ## License
 
