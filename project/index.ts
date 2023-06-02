@@ -16,6 +16,8 @@ type InputEvents = {
     DOUBLE_NUMBER: (a: number) => void
     RESERVE_STRING: (data: { str: string }) => void
     BEGIN_COUNT: () => void
+    INIT_CANVAS: (params: { canvas: OffscreenCanvas, transfer: Transferable[] }) => void
+    DRAW_RECT: (params: { width: number, height: number })=>void
 }
 
 type OutputEvents = {
@@ -44,6 +46,9 @@ class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEven
     count = 0
     @GlobalVariable<any>()
     timer: any
+
+    @GlobalVariable<OffscreenCanvas>()
+    canvas!: OffscreenCanvas
 
     @SubscribeMessage<InputEvents>('COMBINE_MESSAGE')
     async combineMessage(data: InferParams<InputEvents, 'COMBINE_MESSAGE'>) {
@@ -85,6 +90,25 @@ class MyAccessibleWorker extends ChannelWorkerDefinition<InputEvents, OutputEven
 
     }
 
+    @SubscribeMessage<InputEvents>('INIT_CANVAS')
+    async initCanvas(param: InferParams<InputEvents, 'INIT_CANVAS'>) {
+        if (!this.canvas) {
+            this.canvas = param.canvas
+        }
+    }
+
+    @SubscribeMessage<InputEvents>('DRAW_RECT')
+    async drawRect(param: InferParams<InputEvents, 'DRAW_RECT'>) {
+        const _w = this.canvas.width
+        this.canvas.width = _w
+        const ctx = this.canvas.getContext('2d')
+        if (ctx) {
+            const _ctx = ctx as OffscreenCanvasRenderingContext2D
+            _ctx.rect(20, 20, param.width, param.height);
+            _ctx.fillStyle = 'red';
+            _ctx.fill()
+        }
+    }
 }
 
 // Define function  set
@@ -98,17 +122,7 @@ const functionSet = {
     factorial: (num: number): number => new MyOwnModule.CalculateClass().factorial(num),
     getMsg: (): string => 'Accessible Worker &^<>^&',
     realUUID: () => MyOwnModule.uuid(),
-    endsWith: (str: string, suffix: string) => MyOwnModule.endWith(str, suffix),
-    draw: (canvas: OffscreenCanvas, option: { transfer: Transferable[] }) => {
-        const ctx :null| OffscreenRenderingContext = canvas.getContext('2d')
-        if(ctx){
-            const _ctx = ctx as OffscreenCanvasRenderingContext2D
-            _ctx.rect(20, 20, 150, 100);
-            _ctx.fillStyle = '#495057';
-            _ctx.fill()
-        }
-
-    }
+    endsWith: (str: string, suffix: string) => MyOwnModule.endWith(str, suffix)
 }
 // register Channel Worker
 const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyAccessibleWorker)
@@ -153,21 +167,31 @@ functionalWorkerClient.then(f => {
         console.log('=====END WITH===')
         console.log(res ? 'YES' : 'NO')
     })
-    const canvas = document.getElementById('canvas') as HTMLCanvasElement
-    if (canvas) {
-        const offCanvas = canvas.transferControlToOffscreen();
-        f.draw(offCanvas, {transfer:[offCanvas]})
-    }
+
 
 })
 const begin = document.getElementById('begin-count') as HTMLButtonElement
 
 const countP = document.getElementById('count') as HTMLParagraphElement
-
+const canvas = document.getElementById('canvas') as HTMLCanvasElement
+const offscreenCanvas = canvas.transferControlToOffscreen()
+const drawRect = document.getElementById('draw-rect') as HTMLButtonElement
+const drawRec1 = document.getElementById('draw-rect1') as HTMLButtonElement
 // Use Channel Client
 channelWorkerClient.then(client => {
     if (begin) {
         begin.addEventListener('click', () => client.emit('BEGIN_COUNT'))
+    }
+    client.emit('INIT_CANVAS',{canvas: offscreenCanvas, transfer: [offscreenCanvas]})
+    if (drawRect) {
+        drawRect.onclick = () => {
+            client.emit('DRAW_RECT', {width: 100, height: 100})
+        }
+    }
+    if(drawRec1){
+        drawRec1.onclick = () => {
+            client.emit('DRAW_RECT', {width: 200, height: 200})
+        }
     }
 
     client.on('COMBINED_MESSAGE', (msg: string) => {

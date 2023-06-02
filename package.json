@@ -19,7 +19,7 @@
     "doc": "typedoc --options ./typedoc.json && shx cp -r ./images ./docs",
     "rm-lib": "rimraf node_modules/accessible-worker",
     "markdown": "rimraf markdown && api-documenter markdown  -i temp  -o markdown",
-    "install-lib": "shx cp -r ./output ./node_modules/accessible-worker"
+    "install-lib": "rimraf ./node_modules/accessible-worker && shx cp -r ./output ./node_modules/accessible-worker"
   },
   "author": "HongXiang Li",
   "license": "Apache-2.0",
