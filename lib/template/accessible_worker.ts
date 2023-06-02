@@ -69,14 +69,23 @@ export const buildWorkerJs = (initialFunc: string, globalFunctions: string, glob
                 pureParam.push(p)
             }
         }
-        self.postMessage({
+        
+        if(transfer && Array.isArray(transfer) && transfer.length > 0){
+            self.postMessage({
             event: event,
             args: pureParam
-        }, {transfer:transfer})
+             }, {transfer:transfer})
+        }else{
+           self.postMessage({
+            event: event,
+            args: args
+           })
+        }
+       
     } else {
         let transfer = []
         const pureParam = {}
-        if (param && Object.hasOwn(args, 'transfer')) {
+        if (args && Object.hasOwn(args, 'transfer')) {
             for (const key of Object.keys(args)) {
                 if (key === 'transfer') {
                     transfer = args['transfer']
@@ -85,10 +94,18 @@ export const buildWorkerJs = (initialFunc: string, globalFunctions: string, glob
                 }
             }
         }
-        self.postMessage({
+        if(transfer && Array.isArray(transfer) && transfer.length > 0){
+            self.postMessage({
             event: event,
             args: pureParam
-        }, {transfer:transfer})
+           }, {transfer:transfer})
+        }else{
+          self.postMessage({
+            event: event,
+            args: args
+           })
+        }
+        
     }
 
 }
@@ -118,77 +135,120 @@ export const buildFunctionalWorkerJs = (globalFunctions: string) =>
   /** Message Subscribe **/
   self.onmessage = (msg) => {
     const executionRes = self[msg.data.event].apply(self, msg.data.args)
-    if(self.isPromise(executionRes)){
-       executionRes.then(res=>{
-     if (args && Array.isArray(res)) {
-        let transfer = []
-        const pureParam = []
-        for (const p of res) {
-            if (p.transfer) {
-                transfer = p.transfer
-            } else {
-                pureParam.push(p)
-            }
-        }
-        self.postMessage({
-             event:msg.data.event,
-             args:pureParam,
-             handlerIndex:msg.data.handlerIndex
-        },{transfer:transfer})
-    } else {
-        let transfer = []
-        const pureParam = {}
-        if (param && Object.hasOwn(res, 'transfer')) {
-            for (const key of Object.keys(res)) {
-                if (key === 'transfer') {
-                    transfer = res['transfer']
+    if (self.isPromise(executionRes)) {
+        executionRes.then(res => {
+            if (res && Array.isArray(res)) {
+                let transfer = []
+                const pureParam = []
+                for (const p of res) {
+                    if (p.transfer) {
+                        transfer = p.transfer
+                    } else {
+                        pureParam.push(p)
+                    }
+                }
+                if (transfer && Array.isArray(transfer) && transfer.length > 0) {
+                    self.postMessage({
+                        event: msg.data.event,
+                        args: pureParam,
+                        handlerIndex: msg.data.handlerIndex
+                    }, {
+                        transfer: transfer
+                    })
                 } else {
-                    pureParam[key] = res[key]
+                    self.postMessage({
+                        event: msg.data.event,
+                        args: res,
+                        handlerIndex: msg.data.handlerIndex
+                    })
+                }
+
+            } else {
+                let transfer = []
+                const pureParam = {}
+                if (res && Object.hasOwn(res, 'transfer')) {
+                    for (const key of Object.keys(res)) {
+                        if (key === 'transfer') {
+                            transfer = res['transfer']
+                        } else {
+                            pureParam[key] = res[key]
+                        }
+                    }
+                }
+                if (transfer && Array.isArray(transfer) && transfer.length > 0) {
+                    self.postMessage({
+                        event: msg.data.event,
+                        args: pureParam,
+                        handlerIndex: msg.data.handlerIndex
+                    }, {
+                        transfer: transfer
+                    })
+                } else {
+                    self.postMessage({
+                        event: msg.data.event,
+                        args: res,
+                        handlerIndex: msg.data.handlerIndex
+                    })
+                }
+
+            }
+        })
+    } else {
+        if (executionRes && Array.isArray(executionRes)) {
+            let transfer = []
+            const pureParam = []
+            for (const p of executionRes) {
+                if (p.transfer) {
+                    transfer = p.transfer
+                } else {
+                    pureParam.push(p)
                 }
             }
-        }
-        self.postMessage({
-             event:msg.data.event,
-             args:pureParam,
-             handlerIndex:msg.data.handlerIndex
-        },{transfer:transfer})
-    }
-    }else{
-       if (args && Array.isArray(executionRes)) {
-        let transfer = []
-        const pureParam = []
-        for (const p of executionRes) {
-            if (p.transfer) {
-                transfer = p.transfer
+            if (transfer && Array.isArray(transfer) && transfer.length > 0) {
+                self.postMessage({
+                    event: msg.data.event,
+                    args: pureParam,
+                    handlerIndex: msg.data.handlerIndex
+                }, {
+                    transfer: transfer
+                })
             } else {
-                pureParam.push(p)
+                self.postMessage({
+                    event: msg.data.event,
+                    args: executionRes,
+                    handlerIndex: msg.data.handlerIndex
+                })
             }
-        }
-        self.postMessage({
-             event:msg.data.event,
-             args:pureParam,
-             handlerIndex:msg.data.handlerIndex
-        },{transfer:transfer})
-    } else {
-        let transfer = []
-        const pureParam = {}
-        if (param && Object.hasOwn(executionRes, 'transfer')) {
-            for (const key of Object.keys(executionRes)) {
-                if (key === 'transfer') {
-                    transfer = executionRes['transfer']
-                } else {
-                    pureParam[key] = executionRes[key]
+        } else {
+            let transfer = []
+            const pureParam = {}
+            if (executionRes && Object.hasOwn(executionRes, 'transfer')) {
+                for (const key of Object.keys(executionRes)) {
+                    if (key === 'transfer') {
+                        transfer = executionRes['transfer']
+                    } else {
+                        pureParam[key] = executionRes[key]
+                    }
                 }
             }
+            if (transfer && Array.isArray(transfer) && transfer.length > 0) {
+                self.postMessage({
+                    event: msg.data.event,
+                    args: pureParam,
+                    handlerIndex: msg.data.handlerIndex
+                }, {
+                    transfer: transfer
+                })
+            } else {
+                self.postMessage({
+                    event: msg.data.event,
+                    args: executionRes,
+                    handlerIndex: msg.data.handlerIndex
+                })
+            }
         }
-        self.postMessage({
-             event:msg.data.event,
-             args:pureParam,
-             handlerIndex:msg.data.handlerIndex
-        },{transfer:transfer})
     }
-    }
-  }
+}
  
 `
 

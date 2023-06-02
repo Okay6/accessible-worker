@@ -121,9 +121,10 @@ class FunctionSetWorkerProxyClient<F extends FunctionSet> {
         for (const k in f) {
             (this as unknown as FunctionSet)[k] = (...args) => {
                 const handlerIndex = this.getMaxHandlerIndex()
-                let transfer = []
-                const pureParam: never[] = []
+
                 if (args && Array.isArray(args)) {
+                    let transfer = []
+                    const pureParam: never[] = []
                     for (const p of args) {
                         if ((p as any).transfer) {
                             transfer = (p as any).transfer
@@ -131,8 +132,34 @@ class FunctionSetWorkerProxyClient<F extends FunctionSet> {
                             pureParam.push(p)
                         }
                     }
+                    if (transfer && Array.isArray(transfer) && transfer.length > 0) {
+                        this.worker.postMessage({event: k, args: pureParam, handlerIndex: handlerIndex}, transfer)
+
+                    } else {
+                        this.worker.postMessage({event: k, args: args, handlerIndex: handlerIndex})
+                    }
+                } else {
+                    let transfer:unknown[] = []
+                    const pureParam: { [key: string]: unknown } = {}
+                    const param = args
+                    if (param && Object.hasOwn(param, 'transfer')) {
+                        for (const key of Object.keys(param)) {
+                            if (key === 'transfer') {
+                                transfer = param['transfer']
+                            } else {
+                                pureParam[key] = param[key]
+                            }
+                        }
+                    }
+                    if (transfer && Array.isArray(transfer) && transfer.length > 0) {
+                        this.worker.postMessage({event: k, args: pureParam, handlerIndex: handlerIndex}, transfer)
+
+                    } else {
+                        this.worker.postMessage({event: k, args: args, handlerIndex: handlerIndex})
+                    }
                 }
-                this.worker.postMessage({event: k, args: pureParam, handlerIndex: handlerIndex}, transfer)
+
+
                 return new Promise<any>((resolve: (...args: any) => void | any) => {
                     this.handlerQueue[handlerIndex] = resolve
                 })
