@@ -17,7 +17,6 @@ import {
 import * as jsBeautify from './decorator/beautify.min.js'
 
 
-
 /**
  * An events map is an interface that maps event names to their value, which
  * represents the type of the `on` listener.
@@ -175,19 +174,36 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
     //noinspection all
     emit<Ev extends EventNames<O>>(ev: Ev, ...arg: EventParams<O, Ev>): void {
         let transfer = []
-        const pureParam: unknown[] = []
+        const pureParam: { [key: string]: unknown } = {}
         if (arg && Array.isArray(arg)) {
-            for (const p of arg) {
-                if (p.transfer) {
-                    transfer = p.transfer
-                } else {
-                    pureParam.push(p)
+            const param = arg[0]
+            if (param && Object.hasOwn(param, 'transfer')) {
+                for (const key of Object.keys(param)) {
+                    if (key === 'transfer') {
+                        transfer = param['transfer']
+                    } else {
+                        pureParam[key] = param[key]
+                    }
+                }
+            }
+        } else {
+            const param = arg
+            if (param && Object.hasOwn(param, 'transfer')) {
+                for (const key of Object.keys(param)) {
+                    if (key === 'transfer') {
+                        transfer = param['transfer']
+                    } else {
+                        pureParam[key] = param[key]
+                    }
                 }
             }
         }
-        this.worker.postMessage({event: ev, args: pureParam}, transfer)
+        if (transfer && Array.isArray(transfer) && transfer.length > 0) {
+            this.worker.postMessage({event: ev, args: [pureParam]}, transfer)
+        } else {
+            this.worker.postMessage({event: ev, args: arg})
+        }
     }
-
 }
 
 // eslint-disable-next-line functional/no-class

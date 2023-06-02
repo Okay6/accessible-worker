@@ -1,6 +1,6 @@
 {
   "name": "accessible-worker",
-  "version": "0.0.1-dev-9",
+  "version": "0.0.1-dev-10",
   "description": "Make web worker more accessible",
   "main": "index.ts",
   "scripts": {
@@ -19,7 +19,7 @@
     "doc": "typedoc --options ./typedoc.json && shx cp -r ./images ./docs",
     "rm-lib": "rimraf node_modules/accessible-worker",
     "markdown": "rimraf markdown && api-documenter markdown  -i temp  -o markdown",
-    "install-lib": "shx cp -r ./output ./node_modules/accessible-worker"
+    "install-lib": "rimraf ./node_modules/accessible-worker && shx cp -r ./output ./node_modules/accessible-worker"
   },
   "author": "HongXiang Li",
   "license": "Apache-2.0",

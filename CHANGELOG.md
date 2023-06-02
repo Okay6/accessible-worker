@@ -1,3 +1,10 @@
+## <small>0.0.1-dev-10 (2023-06-02)</small>
+
+* build(package.json): update version to v0.0.1-dev-10 ([559ece1](https://github.com/Okay6/accessible-worker/commit/559ece1))
+* fix(lib/experiment.ts): fix the issue the cloud not pass transfer object to web worker ([b77f235](https://github.com/Okay6/accessible-worker/commit/b77f235))
+
+
+
 ## <small>0.0.1-dev-9 (2023-06-02)</small>
 
 * build(package.json): udpate version to v0.0.1-dev-9 ([79355bc](https://github.com/Okay6/accessible-worker/commit/79355bc))
