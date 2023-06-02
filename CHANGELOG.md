@@ -1,3 +1,10 @@
+## <small>0.0.1-dev-11 (2023-06-02)</small>
+
+* build(package.json): hotfix ([8bf1565](https://github.com/Okay6/accessible-worker/commit/8bf1565))
+* fix(/lib/experiment): worker inner generated wrong code ([4299c0f](https://github.com/Okay6/accessible-worker/commit/4299c0f))
+
+
+
 ## <small>0.0.1-dev-10 (2023-06-02)</small>
 
 * build(package.json): update version to v0.0.1-dev-10 ([559ece1](https://github.com/Okay6/accessible-worker/commit/559ece1))
