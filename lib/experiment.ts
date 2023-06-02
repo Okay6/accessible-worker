@@ -17,6 +17,7 @@ import {
 import * as jsBeautify from './decorator/beautify.min.js'
 
 
+
 /**
  * An events map is an interface that maps event names to their value, which
  * represents the type of the `on` listener.
@@ -83,7 +84,6 @@ export type InferParams<E extends EventsMap, K extends keyof EventsMap> =
     Parameters<E[K]> extends Array<any> ? Parameters<E[K]>[0] : never
 
 
-
 export interface IChannelWorkerClient<ListenEvents extends EventsMap, EmitEvents extends EventsMap> {
     on<Ev extends UserEventNames<ListenEvents>>(ev: Ev, listener: UserListener<ListenEvents, Ev>): void;
 
@@ -122,7 +122,18 @@ class FunctionSetWorkerProxyClient<F extends FunctionSet> {
         for (const k in f) {
             (this as unknown as FunctionSet)[k] = (...args) => {
                 const handlerIndex = this.getMaxHandlerIndex()
-                this.worker.postMessage({event: k, args: args, handlerIndex: handlerIndex})
+                let transfer = []
+                const pureParam: never[] = []
+                if (args && Array.isArray(args)) {
+                    for (const p of args) {
+                        if ((p as any).transfer) {
+                            transfer = (p as any).transfer
+                        } else {
+                            pureParam.push(p)
+                        }
+                    }
+                }
+                this.worker.postMessage({event: k, args: pureParam, handlerIndex: handlerIndex}, transfer)
                 return new Promise<any>((resolve: (...args: any) => void | any) => {
                     this.handlerQueue[handlerIndex] = resolve
                 })
@@ -163,7 +174,18 @@ class ChannelWorkerClient<I extends EventsMap, O extends EventsMap> implements I
 
     //noinspection all
     emit<Ev extends EventNames<O>>(ev: Ev, ...arg: EventParams<O, Ev>): void {
-        this.worker.postMessage({event: ev, args: arg})
+        let transfer = []
+        const pureParam: unknown[] = []
+        if (arg && Array.isArray(arg)) {
+            for (const p of arg) {
+                if (p.transfer) {
+                    transfer = p.transfer
+                } else {
+                    pureParam.push(p)
+                }
+            }
+        }
+        this.worker.postMessage({event: ev, args: pureParam}, transfer)
     }
 
 }
@@ -187,6 +209,7 @@ export abstract class ChannelWorkerDefinition<ListenEvents extends EventsMap,
 export class AccessibleWorkerFactory {
     private constructor() {
     }
+
     /**
      * 根据ChannelWorkerDefinition构造Worker
      * @param _t
@@ -229,8 +252,8 @@ export class AccessibleWorkerFactory {
                         const exportName = source.match(r);
                         if (exportName && exportName.length > 0) {
                             replaceName = exportName[0]
-                            const replaceExport = new RegExp(`export\\s*\\{\\s*[\\w_]+\\sas\\s${workerRegisterParams.module?.name}\\s*\\};*`,'g');
-                            source = source.replace(replaceExport,'')
+                            const replaceExport = new RegExp(`export\\s*\\{\\s*[\\w_]+\\sas\\s${workerRegisterParams.module?.name}\\s*\\};*`, 'g');
+                            source = source.replace(replaceExport, '')
                         }
 
                         const accessibleModule = source + '\n' + `var ${workerRegisterParams.module?.name} = ${replaceName}`
@@ -293,8 +316,8 @@ export class AccessibleWorkerFactory {
                     const exportName = source.match(r);
                     if (exportName && exportName.length > 0) {
                         replaceName = exportName[0]
-                        const replaceExport = new RegExp(`export\\s*\\{\\s*[\\w_]+\\sas\\s${workerRegisterParams.module?.name}\\s*\\};*`,'g');
-                        source = source.replace(replaceExport,'')
+                        const replaceExport = new RegExp(`export\\s*\\{\\s*[\\w_]+\\sas\\s${workerRegisterParams.module?.name}\\s*\\};*`, 'g');
+                        source = source.replace(replaceExport, '')
                     }
                     const accessibleModule = source + '\n' + `var ${workerRegisterParams.module?.name} = ${replaceName}`
 
