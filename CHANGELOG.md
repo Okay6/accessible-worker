@@ -1,3 +1,33 @@
+## <small>0.0.1-dev-9 (2023-06-02)</small>
+
+* build(package.json): udpate version to v0.0.1-dev-9 ([79355bc](https://github.com/Okay6/accessible-worker/commit/79355bc))
+* feat(lib/experiment.ts): support pass transfer param in postmessage ([883a9ec](https://github.com/Okay6/accessible-worker/commit/883a9ec))
+* docs(readme.md): add logo for accessible-worker ([b154e58](https://github.com/Okay6/accessible-worker/commit/b154e58))
+* docs(update docs): update docs with logo ([d0f26f2](https://github.com/Okay6/accessible-worker/commit/d0f26f2))
+
+
+
+## <small>0.0.1-dev-8 (2023-05-30)</small>
+
+* build(package.json): update npm pakcage version to 0.0.1-dev-8 ([042e2ed](https://github.com/Okay6/accessible-worker/commit/042e2ed))
+* style(changelog.md): update changelog,add 0.0.1-dev-8 change log ([103c6cb](https://github.com/Okay6/accessible-worker/commit/103c6cb))
+* docs(readme.md): add todo list and changelog link ([9f5192a](https://github.com/Okay6/accessible-worker/commit/9f5192a))
+* docs(update docs): update docs, fix empty link error ([a0faab9](https://github.com/Okay6/accessible-worker/commit/a0faab9))
+
+
+
+## <small>0.0.1-dev-7 (2023-05-30)</small>
+
+* build(update npm package version): update npm package version ([4202e41](https://github.com/Okay6/accessible-worker/commit/4202e41))
+* docs(changelog.md): update changelog ([02ce4c8](https://github.com/Okay6/accessible-worker/commit/02ce4c8))
+* docs(changelog.md): update changlog on 0.0.1-dev4 ([07e1f07](https://github.com/Okay6/accessible-worker/commit/07e1f07))
+* docs(update docs): update docs for github pages ([d362aaf](https://github.com/Okay6/accessible-worker/commit/d362aaf))
+* docs(update readme.md): add more project info ([028da1a](https://github.com/Okay6/accessible-worker/commit/028da1a))
+* feat(changelog.md): add changelog.md and integrate commitizen ([a7f91d0](https://github.com/Okay6/accessible-worker/commit/a7f91d0))
+* Update docs images reference URL ([9f2ee20](https://github.com/Okay6/accessible-worker/commit/9f2ee20))
+
+
+
 ## <small>0.0.1-dev-8 (2023-05-30)</small>
 * docs(readme.md): add todo list and changelog link ([96ba60e](https://github.com/Okay6/accessible-worker/commit/96ba60e))
 * docs(update docs): update docs, fix empty link error ([7d761bb](https://github.com/Okay6/accessible-worker/commit/7d761bb))
