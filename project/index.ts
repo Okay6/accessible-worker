@@ -3,7 +3,8 @@ import {
     AccessibleWorker,
     AccessibleWorkerFactory,
     ChannelWorkerDefinition,
-    GlobalVariable, InferParams,
+    GlobalVariable,
+    InferParams,
     SubscribeMessage
 } from "accessible-worker";
 import {MyOwnModule} from "./worker_module";
@@ -97,7 +98,17 @@ const functionSet = {
     factorial: (num: number): number => new MyOwnModule.CalculateClass().factorial(num),
     getMsg: (): string => 'Accessible Worker &^<>^&',
     realUUID: () => MyOwnModule.uuid(),
-    endsWith: (str: string, suffix: string) => MyOwnModule.endWith(str, suffix)
+    endsWith: (str: string, suffix: string) => MyOwnModule.endWith(str, suffix),
+    draw: (canvas: OffscreenCanvas, option: { transfer: Transferable[] }) => {
+        const ctx :null| OffscreenRenderingContext = canvas.getContext('2d')
+        if(ctx){
+            const _ctx = ctx as OffscreenCanvasRenderingContext2D
+            _ctx.rect(20, 20, 150, 100);
+            _ctx.fillStyle = '#495057';
+            _ctx.fill()
+        }
+
+    }
 }
 // register Channel Worker
 const channelWorkerClient = AccessibleWorkerFactory.registerChannelWorker<InputEvents, OutputEvents>(MyAccessibleWorker)
@@ -142,11 +153,17 @@ functionalWorkerClient.then(f => {
         console.log('=====END WITH===')
         console.log(res ? 'YES' : 'NO')
     })
+    const canvas = document.getElementById('canvas') as HTMLCanvasElement
+    if (canvas) {
+        const offCanvas = canvas.transferControlToOffscreen();
+        f.draw(offCanvas, {transfer:[offCanvas]})
+    }
 
 })
 const begin = document.getElementById('begin-count') as HTMLButtonElement
 
 const countP = document.getElementById('count') as HTMLParagraphElement
+
 // Use Channel Client
 channelWorkerClient.then(client => {
     if (begin) {
